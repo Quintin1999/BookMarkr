@@ -17,7 +17,18 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    "types": ["node"]
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "env.d.ts",
+    "server.ts",
+    "app.tsx",
+    "routes/**/*.ts", 
+    "models/**/*.ts",
+    "vite.config.ts",
+    "./@types",                // Custom types folder for environment variables
+    "./backend/**/*.ts"         // Path to your backend code (update this as needed)
+  ]
 }
