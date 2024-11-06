@@ -23,6 +23,7 @@
   },
   "include": [
     "env.d.ts",
+    "express.d.ts",
     "server.ts",
     "app.tsx",
     "routes/**/*.ts", 
