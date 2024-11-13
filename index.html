@@ -1,13 +1,92 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/images/Bookmarkr_Logo.png" type="image/png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BookMarkr</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+</head>
+<body>
+    <h1>API Testing Form</h1>
+
+    <!-- Create User -->
+    <h2>Create User</h2>
+    <form action="http://localhost:3000/api/users/create" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required><br>
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" required><br>
+
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required><br>
+
+        <button type="submit">Create User</button>
+    </form>
+
+    <!-- Create Club -->
+    <h2>Create Club</h2>
+    <form action="http://localhost:3000/api/club/create" method="POST">
+        <label for="name">Club Name:</label>
+        <input type="text" name="name" id="name" required><br>
+
+        <label for="description">Description:</label>
+        <input type="text" name="description" id="description"><br>
+
+        <label for="roomKey">Room Key:</label>
+        <input type="text" name="roomKey" id="roomKey" required><br>
+
+        <label for="userId">User ID (Owner):</label>
+        <input type="text" name="userId" id="userId" required><br>
+
+        <button type="submit">Create Club</button>
+    </form>
+
+    <!-- Join Club -->
+    <h2>Join Club</h2>
+    <form action="http://localhost:3000/api/club/join" method="POST">
+        <label for="clubId">Club ID:</label>
+        <input type="text" name="clubId" id="clubId" required><br>
+
+        <label for="userId">User ID:</label>
+        <input type="text" name="userId" id="userId" required><br>
+
+        <label for="roomKey">Room Key:</label>
+        <input type="text" name="roomKey" id="roomKey" required><br>
+
+        <button type="submit">Join Club</button>
+    </form>
+
+    <!-- Add Book to Club Library -->
+    <h2>Add Book to Club Library</h2>
+    <form action="http://localhost:3000/api/club/add-book" method="POST">
+        <label for="clubId">Club ID:</label>
+        <input type="text" name="clubId" id="clubId" required><br>
+
+        <label for="bookId">Book ID:</label>
+        <input type="text" name="bookId" id="bookId" required><br>
+
+        <button type="submit">Add Book</button>
+    </form>
+
+    <!-- Leave Club -->
+    <h2>Leave Club</h2>
+    <form action="http://localhost:3000/api/club/leave" method="POST">
+        <label for="clubId">Club ID:</label>
+        <input type="text" name="clubId" id="clubId" required><br>
+
+        <label for="userId">User ID:</label>
+        <input type="text" name="userId" id="userId" required><br>
+
+        <button type="submit">Leave Club</button>
+    </form>
+
+    <!-- Get Club Details -->
+    <h2>Get Club Details</h2>
+    <form action="http://localhost:3000/api/club/details" method="GET">
+        <label for="clubId">Club ID:</label>
+        <input type="text" name="clubId" id="clubId" required><br>
+
+        <button type="submit">Get Details</button>
+    </form>
+</body>
 </html>

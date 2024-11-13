@@ -16,7 +16,7 @@ const BookSchema: Schema<IBook> = new Schema({
     googleId: { type: String, required: true, unique: true },
     title: { type: String, required: true },
     authors: { type: [String], required: true },
-    description: { type: String, required: true },
+    description: { type: String, required: true, default: 'No description available' },
     thumbnail: { type: String, required: true },
     addedByUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     clubId: { type: mongoose.Schema.Types.ObjectId, ref: 'Club' }

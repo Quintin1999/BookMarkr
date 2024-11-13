@@ -3,6 +3,7 @@
 import { Request, Response } from 'express';
 import Club from '../models/clubSchema';
 import User from '../models/userSchema';
+import Book from '../models/bookSchema';
 
 // Create a new club
 export const createClub = async (req: Request, res: Response): Promise<void> => {
@@ -19,7 +20,7 @@ export const createClub = async (req: Request, res: Response): Promise<void> => 
             name,
             description,
             roomKey,
-            members: [userId],
+            owner: userId, // Set the user as the club owner
         });
 
         await newClub.save();
@@ -27,13 +28,9 @@ export const createClub = async (req: Request, res: Response): Promise<void> => 
         // Add the club to the user's joinedClubs array
         await User.findByIdAndUpdate(userId, { $addToSet: { joinedClubs: newClub._id } });
 
-        res.status(201).json({ message: 'Club created and joined successfully', club: newClub });
+        res.status(201).json({ message: 'Club created successfully', club: newClub });
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.status(500).json({ error: 'Error creating club' });
-        }
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Error creating club' });
     }
 };
 
@@ -47,8 +44,16 @@ export const joinClub = async (req: Request, res: Response): Promise<void> => {
             res.status(404).json({ message: 'Club not found' });
             return;
         }
+        
+        // Check if the roomKey matches
         if (club.roomKey !== roomKey) {
             res.status(403).json({ message: 'Invalid room key' });
+            return;
+        }
+
+        // Prevent the owner from being added to members
+        if (club.owner.toString() === userId) {
+            res.status(400).json({ message: 'Owner cannot join as a member' });
             return;
         }
 
@@ -57,11 +62,7 @@ export const joinClub = async (req: Request, res: Response): Promise<void> => {
 
         res.status(200).json({ message: 'User joined the club successfully' });
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.status(500).json({ error: 'Error joining club' });
-        }
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Error joining club' });
     }
 };
 
@@ -70,15 +71,77 @@ export const leaveClub = async (req: Request, res: Response): Promise<void> => {
     const { userId, clubId } = req.body;
 
     try {
+        const club = await Club.findById(clubId);
+
+        if (!club) {
+            res.status(404).json({ message: 'Club not found' });
+            return;
+        }
+
+        // Prevent the owner from leaving their own club
+        if (club.owner.toString() === userId) {
+            res.status(400).json({ message: 'Owner cannot leave their own club' });
+            return;
+        }
+
         await User.findByIdAndUpdate(userId, { $pull: { joinedClubs: clubId } });
         await Club.findByIdAndUpdate(clubId, { $pull: { members: userId } });
 
         res.status(200).json({ message: 'User left the club successfully' });
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.status(500).json({ error: 'Error leaving club' });
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Error leaving club' });
+    }
+};
+
+export const getClubDetails = async (req: Request, res: Response): Promise<void> => {
+    const { clubId } = req.params;
+
+    try {
+        const club = await Club.findById(clubId)
+            .populate('owner', 'name') // Populating owner name
+            .populate('members', 'name'); // Populating members' names
+
+        if (!club) {
+            res.status(404).json({ message: 'Club not found' });
+            return;
         }
+
+        res.status(200).json(club);
+    } catch (error: unknown) {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Error fetching club details' });
+    }
+};
+
+export const addBookToClubLibrary = async (req: Request, res: Response): Promise<void> => {
+    const { clubId } = req.params;
+    const { bookId } = req.body;
+
+    try {
+        const club = await Club.findById(clubId);
+        if (!club) {
+            res.status(404).json({ message: 'Club not found' });
+            return;
+        }
+
+        // Check if the book exists in the Book collection
+        const book = await Book.findById(bookId);
+        if (!book) {
+            res.status(404).json({ message: 'Book not found' });
+            return;
+        }
+
+        // Check if the book already exists in the club's library
+        if (club.books.includes(bookId)) {
+            res.status(400).json({ message: 'Book already exists in the club library' });
+            return;
+        }
+
+        // Add the book to the club's books array
+        club.books.push(bookId);
+        await club.save();
+
+        res.status(200).json({ message: 'Book added to club library successfully' });
+    } catch (error: unknown) {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Error adding book to club library' });
     }
 };

@@ -9,7 +9,8 @@ export interface IClub extends Document {
     owner: mongoose.Types.ObjectId | IUser;
     roomKey: string;
     createdAt?: Date;
-    members: mongoose.Types.ObjectId[]; // Array of user IDs who joined the club
+    members: mongoose.Types.ObjectId[];
+    books: mongoose.Types.ObjectId[]; // Array to hold book references
 }
 
 const ClubSchema: Schema<IClub> = new Schema({
@@ -18,7 +19,8 @@ const ClubSchema: Schema<IClub> = new Schema({
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     roomKey: { type: String, required: true, unique: true },
     createdAt: { type: Date, default: Date.now },
-    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] // Array of references to Users
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    books: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }] // Array to hold book references
 });
 
 // Pre-save hook to generate roomKey if not provided

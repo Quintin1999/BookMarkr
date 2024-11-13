@@ -1,17 +1,26 @@
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
+import connectDB from './db';
 dotenv.config(); // This loads the variables from your .env file into process.env
+
+connectDB();
 
 import express from 'express';
 import bookRoutes from './routes/bookRoutes';
 import authRoutes from './routes/authRoutes';
-import cludRoutes from './routes/clubRoutes';   
+import clubRoutes from './routes/clubRoutes';
+import taskRoutes from './routes/taskRoutes';
+import commentRoutes from './routes/commentRoutes';
+import userRoutes from './routes/userRoutes';
 
-const app = express();
+const app = express(); // Now works with the default import
 
 app.use(express.json());
-app.use('/api/books', bookRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/club', cludRoutes);
+app.use('/api/books', bookRoutes);  // Book routes
+app.use('/api/auth', authRoutes);   // Auth routes
+app.use('/api/club', clubRoutes);   // Club routes
+app.use('/api/tasks', taskRoutes);  // Task routes
+app.use('/api/comments', commentRoutes);  // Comment routes
+app.use('/api/users', userRoutes);  // User routes
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

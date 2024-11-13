@@ -1,8 +1,10 @@
+// backend/db.ts
+
 import mongoose from 'mongoose';
 
-const connectDB = async (): Promise<void> => {
+const connectDB = async () => {
     try {
-        const mongoURI = process.env.MONGO_URI || ''; // Access MONGO_URI from .env
+        const mongoURI = process.env.MONGO_URI || '';
         await mongoose.connect(mongoURI);
         console.log('MongoDB connected successfully');
     } catch (error) {
@@ -12,4 +14,3 @@ const connectDB = async (): Promise<void> => {
 };
 
 export default connectDB;
-
