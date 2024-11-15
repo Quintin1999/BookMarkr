@@ -1,13 +1,21 @@
 // backend/controllers/clubController.ts
 
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Club from '../models/clubSchema';
 import User from '../models/userSchema';
 import Book from '../models/bookSchema';
 
 // Create a new club
 export const createClub = async (req: Request, res: Response): Promise<void> => {
-    const { name, description, roomKey, userId } = req.body;
+    // Cast req to AuthenticatedRequest to access req.user
+    const { name, description, roomKey } = req.body;
+    const userId = (req as AuthenticatedRequest).user?.id;  // TypeScript now recognizes req.user
+
+    if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+    }
 
     try {
         const existingClub = await Club.findOne({ name });
@@ -20,7 +28,7 @@ export const createClub = async (req: Request, res: Response): Promise<void> => 
             name,
             description,
             roomKey,
-            owner: userId, // Set the user as the club owner
+            owner: userId,  // Set the user as the club owner
         });
 
         await newClub.save();
@@ -33,7 +41,6 @@ export const createClub = async (req: Request, res: Response): Promise<void> => 
         res.status(500).json({ error: error instanceof Error ? error.message : 'Error creating club' });
     }
 };
-
 // Join an existing club
 export const joinClub = async (req: Request, res: Response): Promise<void> => {
     const { userId, clubId, roomKey } = req.body;

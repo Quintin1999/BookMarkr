@@ -1,3 +1,4 @@
+import cors from 'cors';
 import * as dotenv from 'dotenv';
 import connectDB from './db';
 dotenv.config(); // This loads the variables from your .env file into process.env
@@ -14,6 +15,8 @@ import userRoutes from './routes/userRoutes';
 
 const app = express(); // Now works with the default import
 
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 app.use(express.json());
 app.use('/api/books', bookRoutes);  // Book routes
 app.use('/api/auth', authRoutes);   // Auth routes

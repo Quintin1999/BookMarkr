@@ -23,9 +23,21 @@
         <button type="submit">Create User</button>
     </form>
 
+    <!-- Login -->
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="loginEmail">Email:</label>
+        <input type="email" id="loginEmail" name="email" required><br>
+
+        <label for="loginPassword">Password:</label>
+        <input type="password" id="loginPassword" name="password" required><br>
+
+        <button type="submit">Login</button>
+    </form>
+
     <!-- Create Club -->
     <h2>Create Club</h2>
-    <form action="http://localhost:3000/api/club/create" method="POST">
+    <form id="createClubForm">
         <label for="name">Club Name:</label>
         <input type="text" name="name" id="name" required><br>
 
@@ -38,55 +50,91 @@
         <label for="userId">User ID (Owner):</label>
         <input type="text" name="userId" id="userId" required><br>
 
-        <button type="submit">Create Club</button>
+        <button type="button" id="createClubButton">Create Club</button> <!-- Change to 'button' type -->
     </form>
 
-    <!-- Join Club -->
-    <h2>Join Club</h2>
-    <form action="http://localhost:3000/api/club/join" method="POST">
-        <label for="clubId">Club ID:</label>
-        <input type="text" name="clubId" id="clubId" required><br>
+    <script>
+        // Login form submission
+        async function submitLoginForm(event) {
+            event.preventDefault(); // Prevent default form submission
 
-        <label for="userId">User ID:</label>
-        <input type="text" name="userId" id="userId" required><br>
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
 
-        <label for="roomKey">Room Key:</label>
-        <input type="text" name="roomKey" id="roomKey" required><br>
+            try {
+                const response = await fetch('http://localhost:3000/api/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),  // Send email and password
+                });
 
-        <button type="submit">Join Club</button>
-    </form>
+                const result = await response.json();
 
-    <!-- Add Book to Club Library -->
-    <h2>Add Book to Club Library</h2>
-    <form action="http://localhost:3000/api/club/add-book" method="POST">
-        <label for="clubId">Club ID:</label>
-        <input type="text" name="clubId" id="clubId" required><br>
+                if (response.ok) {
+                    // Store the token in localStorage
+                    localStorage.setItem('jwtToken', result.token);
+                    alert('Login successful');
+                    console.log('Token:', result.token);
+                } else {
+                    alert('Login failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('Error during login');
+            }
+        }
 
-        <label for="bookId">Book ID:</label>
-        <input type="text" name="bookId" id="bookId" required><br>
+        // Create club form submission
+        async function submitCreateClubForm(event) {
+            event.preventDefault(); // Prevent default form submission
 
-        <button type="submit">Add Book</button>
-    </form>
+            const form = document.getElementById('createClubForm');
+            const formData = new FormData(form);
+            const data = {
+                name: formData.get('name'),
+                description: formData.get('description'),
+                roomKey: formData.get('roomKey'),
+                userId: formData.get('userId')
+            };
 
-    <!-- Leave Club -->
-    <h2>Leave Club</h2>
-    <form action="http://localhost:3000/api/club/leave" method="POST">
-        <label for="clubId">Club ID:</label>
-        <input type="text" name="clubId" id="clubId" required><br>
+            // Get the token from localStorage
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                alert('No token found. Please login first.');
+                return;
+            }
 
-        <label for="userId">User ID:</label>
-        <input type="text" name="userId" id="userId" required><br>
+            console.log("Submitting create club with data:", data);
 
-        <button type="submit">Leave Club</button>
-    </form>
+            // Send the data to the backend with the Authorization header
+            try {
+                const response = await fetch('http://localhost:3000/api/club/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,  // Send the JWT token in the header
+                    },
+                    body: JSON.stringify(data),
+                });
 
-    <!-- Get Club Details -->
-    <h2>Get Club Details</h2>
-    <form action="http://localhost:3000/api/club/details" method="GET">
-        <label for="clubId">Club ID:</label>
-        <input type="text" name="clubId" id="clubId" required><br>
+                const result = await response.json();
+                if (response.ok) {
+                    console.log('Club created successfully:', result);
+                    alert('Club created successfully!');
+                } else {
+                    console.error('Error creating club:', result.message);
+                    alert('Error creating club: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
 
-        <button type="submit">Get Details</button>
-    </form>
+        // Attach event listeners to forms
+        document.getElementById('loginForm').addEventListener('submit', submitLoginForm);
+        document.getElementById('createClubButton').addEventListener('click', submitCreateClubForm); // Attach to the correct button
+    </script>
 </body>
 </html>
