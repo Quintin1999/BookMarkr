@@ -6,12 +6,6 @@ import Club from '../models/clubSchema';
 import User from '../models/userSchema';
 import Book from '../models/bookSchema';
 
-interface PopulatedClub {
-    _id: string; // or mongoose.Types.ObjectId if you prefer
-    name: string;
-    description: string;
-}
-
 // Create a new club
 export const createClub = async (req: Request, res: Response): Promise<void> => {
     const { name, description, roomKey } = req.body;
@@ -151,13 +145,13 @@ export const addBookToClubLibrary = async (req: Request, res: Response): Promise
         }
 
         // Check if the book already exists in the club's library
-        if (club.books.includes(bookId)) {
+        if (club.library.includes(bookId)) {
             res.status(400).json({ message: 'Book already exists in the club library' });
             return;
         }
 
         // Add the book to the club's books array
-        club.books.push(bookId);
+        club.library.push(bookId);
         await club.save();
 
         res.status(200).json({ message: 'Book added to club library successfully' });
@@ -165,6 +159,12 @@ export const addBookToClubLibrary = async (req: Request, res: Response): Promise
         res.status(500).json({ error: error instanceof Error ? error.message : 'Error adding book to club library' });
     }
 };
+
+interface PopulatedClub {
+    _id: string; // Or mongoose.Types.ObjectId
+    name: string;
+    description: string;
+}
 
 export const getUserClubs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const userId = req.user?.id;
@@ -178,29 +178,23 @@ export const getUserClubs = async (req: AuthenticatedRequest, res: Response): Pr
     try {
         console.log('Fetching user clubs for User ID:', userId);
 
-        // Fetch the user document with populated clubs
         const user = await User.findById(userId)
             .populate<{ createdClubs: PopulatedClub[] }>('createdClubs', 'name description')
             .populate<{ joinedClubs: PopulatedClub[] }>('joinedClubs', 'name description');
 
-        // Log the raw user document
-        console.log('Raw user document:', user);
-
         if (!user) {
-            console.error('No user found for ID:', userId);
             res.status(404).json({ message: 'User not found' });
             return;
         }
 
-        // Format the response
         const clubs = [
-            ...(user.createdClubs ?? []).map((club) => ({
+            ...(user.createdClubs as PopulatedClub[]).map((club) => ({
                 _id: club._id.toString(),
                 name: club.name,
                 description: club.description,
                 role: 'Owner',
             })),
-            ...(user.joinedClubs ?? []).map((club) => ({
+            ...(user.joinedClubs as PopulatedClub[]).map((club) => ({
                 _id: club._id.toString(),
                 name: club.name,
                 description: club.description,
@@ -208,16 +202,114 @@ export const getUserClubs = async (req: AuthenticatedRequest, res: Response): Pr
             })),
         ];
 
-        // Log the formatted clubs
         console.log('Formatted clubs:', clubs);
-
         res.status(200).json(clubs);
     } catch (error) {
         console.error('Error in getUserClubs:', error);
-        res.status(500).json({ message: 'Error fetching user clubs' });
+        res.status(500).json({ message: 'Error fetching user clubs', error });
+    }
+};
+export const updateClub = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { clubId } = req.params;
+    const { name, description, roomKey } = req.body;
+
+    try {
+        const userId = req.user?.id;
+
+        // Ensure the user owns the club
+        const club = await Club.findById(clubId);
+        if (!club) {
+            res.status(404).json({ message: 'Club not found' });
+            return;
+        }
+        if (club.owner.toString() !== userId) {
+            res.status(403).json({ message: 'You do not have permission to update this club' });
+            return;
+        }
+
+        // Update club details
+        const updateData: Partial<{ name: string; description: string; roomKey: string }> = {};
+        if (name) updateData.name = name;
+        if (description) updateData.description = description;
+        if (roomKey) updateData.roomKey = roomKey;
+
+        const updatedClub = await Club.findByIdAndUpdate(clubId, { $set: updateData }, { new: true });
+
+        res.status(200).json({ message: 'Club updated successfully', club: updatedClub });
+    } catch (error) {
+        console.error('Error updating club:', error);
+        res.status(500).json({ message: 'Error updating club', error });
+    }
+};
+export const deleteClub = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { clubId } = req.params;
+
+    try {
+        const userId = req.user?.id;
+
+        // Ensure the user owns the club
+        const club = await Club.findById(clubId);
+        if (!club) {
+            res.status(404).json({ message: 'Club not found' });
+            return;
+        }
+        if (club.owner.toString() !== userId) {
+            res.status(403).json({ message: 'You do not have permission to delete this club' });
+            return;
+        }
+
+        // Delete the club
+        await Club.findByIdAndDelete(clubId);
+
+        // Optionally, remove the club from the owner's createdClubs array
+        await User.findByIdAndUpdate(userId, { $pull: { createdClubs: clubId } });
+
+        res.status(200).json({ message: 'Club deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting club:', error);
+        res.status(500).json({ message: 'Error deleting club', error });
     }
 };
 
+export const getClubLibrary = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { clubId } = req.params;
 
+    try {
+        const club = await Club.findById(clubId).populate('library', 'title authors thumbnail description');
+        if (!club) {
+            res.status(404).json({ message: 'Club not found' });
+            return;
+        }
+
+        res.status(200).json(club.library); // TypeScript now recognizes `library`
+    } catch (error) {
+        console.error('Error fetching club library:', error);
+        res.status(500).json({ message: 'Error fetching club library', error });
+    }
+};
+
+export const deleteBookFromClubLibrary = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { clubId, bookId } = req.params;
+
+    try {
+        const club = await Club.findByIdAndUpdate(
+            clubId,
+            { $pull: { library: bookId } }, // Update the library field
+            { new: true }
+        );
+
+        if (!club) {
+            res.status(404).json({ message: 'Club not found' });
+            return;
+        }
+
+        await Book.findByIdAndDelete(bookId); // Optional: delete the book
+
+        res.status(200).json({ message: 'Book deleted from club library successfully' });
+    } catch (error) {
+        console.error('Error deleting book from club library:', error);
+        res.status(500).json({ message: 'Error deleting book from club library', error });
+    }
+};
 
 

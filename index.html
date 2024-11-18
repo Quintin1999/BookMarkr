@@ -34,7 +34,23 @@
 
         <button type="submit">Login</button>
     </form>
-
+    <!--Update account-->
+    <h2>Update Account</h2>
+    <form id="updateUserForm">
+        <label for="updateUsername">New Username:</label>
+        <input type="text" id="updateUsername" name="username"><br>
+    
+        <label for="updateEmail">New Email:</label>
+        <input type="email" id="updateEmail" name="email"><br>
+    
+        <label for="updatePassword">New Password:</label>
+        <input type="password" id="updatePassword" name="password"><br>
+    
+        <button type="button" id="updateUserButton">Update</button>
+    </form>
+    <!--Delete account-->
+    <h2>Delete Account</h2>
+<button type="button" id="deleteUserButton">Delete My Account</button>
     <!-- Create Club -->
     <h2>Create Club</h2>
     <form id="createClubForm">
@@ -49,7 +65,28 @@
 
         <button type="button" id="createClubButton">Create Club</button>
     </form>
-
+    <!-- Update Club -->
+    <h2>Update Club</h2>
+    <div id="updateClubContainer">
+        <button type="button" id="selectClubToUpdateButton">Select Club to Update</button>
+    </div>
+    <form id="updateClubForm" style="display:none;">
+        <label for="updateName">New Club Name:</label>
+        <input type="text" id="updateName" name="name"><br>
+    
+        <label for="updateDescription">New Description:</label>
+        <input type="text" id="updateDescription" name="description"><br>
+    
+        <label for="updateRoomKey">New Room Key:</label>
+        <input type="text" id="updateRoomKey" name="roomKey"><br>
+    
+        <button type="button" id="updateClubButton">Update Club</button>
+    </form>
+    <!-- Delete Club -->
+    <h2>Delete Club</h2>
+    <div id="deleteClubContainer">
+        <button type="button" id="selectClubToDeleteButton">Select Club to Delete</button>
+    </div>
     <!-- Search Google Books -->
     <h2>Search Google Books</h2>
     <form id="searchBooksForm">
@@ -57,6 +94,16 @@
         <input type="text" name="query" id="query" required>
         <button type="button" id="searchBooksButton">Search</button>
     </form>
+    <!-- delete Book from personal Library -->
+    <h2>Delete Book from Personal Library</h2>
+<div id="deletePersonalBookContainer">
+    <button type="button" id="selectBookToDeleteFromPersonal">Select Book to Delete</button>
+</div>
+    <!-- delete Book from Club Library -->
+<h2>Delete Book from Club Library</h2>
+<div id="deleteClubBookContainer">
+    <button type="button" id="selectBookToDeleteFromClub">Select Club and Book to Delete</button>
+</div>
     <div id="searchResults"></div>
 
     <script>
@@ -84,7 +131,75 @@
                 alert('Error during login');
             }
         }
+        //update account
+        async function updateUserInfo() {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('You must be logged in to update your account.');
+        return;
+    }
 
+    const username = document.getElementById('updateUsername').value;
+    const email = document.getElementById('updateEmail').value;
+    const password = document.getElementById('updatePassword').value;
+
+    const data = {};
+    if (username) data.username = username;
+    if (email) data.email = email;
+    if (password) data.password = password;
+
+    try {
+        const response = await fetch('http://localhost:3000/api/users/update', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Account updated successfully!');
+        } else {
+            alert('Error updating account: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error updating account:', error);
+    }
+}
+        // Delete account
+async function deleteUserAccount() {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('You must be logged in to delete your account.');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/api/users/delete', {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (response.ok) {
+            alert('Account deleted successfully.');
+            localStorage.removeItem('jwtToken'); // Clear token after deletion
+            window.location.reload(); // Reload or redirect to home page
+        } else {
+            const result = await response.json();
+            alert('Error deleting account: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error deleting account:', error);
+    }
+}
         // Create Club
         async function submitCreateClubForm(event) {
             event.preventDefault();
@@ -120,7 +235,190 @@
                 console.error('Error:', error);
             }
         }
+        // Select Club for Update
+        async function selectClubForUpdate() {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('You must be logged in to update a club.');
+        return;
+    }
 
+    try {
+        const response = await fetch('http://localhost:3000/api/club/my-clubs', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+            const result = await response.json();
+            console.error('Error fetching clubs:', result);
+            alert('Error fetching clubs: ' + (result.message || 'Unknown error'));
+            return;
+        }
+
+        const clubs = await response.json();
+        const ownedClubs = clubs.filter((club) => club.role === 'Owner');
+        if (!ownedClubs.length) {
+            alert('You do not own any clubs to update.');
+            return;
+        }
+
+        // Create and display dropdown
+        const updateClubContainer = document.getElementById('updateClubContainer');
+        const existingDropdown = document.getElementById('clubSelectForUpdate');
+        if (existingDropdown) existingDropdown.remove(); // Remove any previous dropdown
+
+        const dropdown = document.createElement('select');
+        dropdown.id = 'clubSelectForUpdate';
+
+        ownedClubs.forEach((club) => {
+            const option = document.createElement('option');
+            option.value = club._id;
+            option.textContent = club.name;
+            dropdown.appendChild(option);
+        });
+
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = 'Confirm Selection';
+        confirmButton.type = 'button';
+        confirmButton.addEventListener('click', () => {
+            const selectedClubId = dropdown.value;
+            document.getElementById('updateClubForm').style.display = 'block';
+            dropdown.remove(); // Remove dropdown after selection
+            confirmButton.remove();
+            document.getElementById('updateClubButton').setAttribute('data-club-id', selectedClubId);
+        });
+
+        updateClubContainer.appendChild(dropdown);
+        updateClubContainer.appendChild(confirmButton);
+    } catch (error) {
+        console.error('Error fetching clubs:', error);
+        alert('Error fetching clubs. Check the console for details.');
+    }
+}
+
+// Update the selected club
+async function updateSelectedClub() {
+    const token = localStorage.getItem('jwtToken');
+    const clubId = document.getElementById('updateClubButton').getAttribute('data-club-id');
+
+    if (!clubId) {
+        alert('No club selected to update.');
+        return;
+    }
+
+    const data = {
+        name: document.getElementById('updateName').value,
+        description: document.getElementById('updateDescription').value,
+        roomKey: document.getElementById('updateRoomKey').value,
+    };
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/club/${clubId}/update`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Club updated successfully!');
+        } else {
+            alert('Error updating club: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error updating club:', error);
+    }
+}
+// select for Delete Club
+async function selectClubForDeletion() {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('You must be logged in to delete a club.');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/api/club/my-clubs', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+            const result = await response.json();
+            console.error('Error fetching clubs:', result);
+            alert('Error fetching clubs: ' + (result.message || 'Unknown error'));
+            return;
+        }
+
+        const clubs = await response.json();
+        const ownedClubs = clubs.filter((club) => club.role === 'Owner');
+        if (!ownedClubs.length) {
+            alert('You do not own any clubs to delete.');
+            return;
+        }
+
+        // Create and display dropdown
+        const deleteClubContainer = document.getElementById('deleteClubContainer');
+        const existingDropdown = document.getElementById('clubSelectForDelete');
+        if (existingDropdown) existingDropdown.remove(); // Remove any previous dropdown
+
+        const dropdown = document.createElement('select');
+        dropdown.id = 'clubSelectForDelete';
+
+        ownedClubs.forEach((club) => {
+            const option = document.createElement('option');
+            option.value = club._id;
+            option.textContent = club.name;
+            dropdown.appendChild(option);
+        });
+
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = 'Confirm Selection';
+        confirmButton.type = 'button';
+        confirmButton.addEventListener('click', () => {
+            const selectedClubId = dropdown.value;
+            if (confirm(`Are you sure you want to delete the club "${dropdown.options[dropdown.selectedIndex].text}"? This action cannot be undone.`)) {
+                deleteSelectedClub(selectedClubId);
+            }
+            dropdown.remove(); // Remove dropdown after selection
+            confirmButton.remove();
+        });
+
+        deleteClubContainer.appendChild(dropdown);
+        deleteClubContainer.appendChild(confirmButton);
+    } catch (error) {
+        console.error('Error fetching clubs:', error);
+        alert('Error fetching clubs. Check the console for details.');
+    }
+}
+
+// Delete the selected club
+async function deleteSelectedClub(clubId) {
+    const token = localStorage.getItem('jwtToken');
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/club/${clubId}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Club deleted successfully!');
+        } else {
+            alert('Error deleting club: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error deleting club:', error);
+        alert('Error deleting club. Check the console for details.');
+    }
+}
         // Search Books
         async function searchBooks(event) {
             event.preventDefault();
@@ -209,8 +507,7 @@
 }
 
       // Select Club
-// Fetch clubs and allow the user to select one
-async function selectClub() {
+      async function selectClub() {
     const token = localStorage.getItem('jwtToken');
     if (!token) {
         alert('You must be logged in to view your clubs.');
@@ -225,43 +522,49 @@ async function selectClub() {
 
         if (!response.ok) {
             const result = await response.json();
-            alert('Error fetching clubs: ' + result.message);
+            console.error('Error response from API:', result);
+            alert('Error fetching clubs: ' + (result.message || 'Unknown error'));
             return null;
         }
 
         const clubs = await response.json();
+        console.log('API response for clubs:', clubs);
 
-        if (clubs.length === 0) {
+        if (!clubs.length) {
             alert('No clubs available to select.');
             return null;
         }
 
+        const ownedClubs = clubs.filter((club) => club.role === 'Owner');
+        console.log('Owned clubs after filtering:', ownedClubs);
+
+        if (!ownedClubs.length) {
+            alert('You do not own any clubs to add books to.');
+            return null;
+        }
+
         return new Promise((resolve) => {
+            const existingDropdown = document.getElementById('clubDropdownContainer');
+            if (existingDropdown) existingDropdown.remove();
+
             const dropdownContainer = document.createElement('div');
             dropdownContainer.id = 'clubDropdownContainer';
 
             const dropdown = document.createElement('select');
             dropdown.id = 'clubSelect';
 
-            clubs.forEach((club) => {
-                if (club.role === 'Owner') { // Filter to only show clubs where the user is the owner
-                    const option = document.createElement('option');
-                    option.value = club._id;
-                    option.textContent = club.name;
-                    dropdown.appendChild(option);
-                }
+            ownedClubs.forEach((club) => {
+                const option = document.createElement('option');
+                option.value = club._id;
+                option.textContent = club.name;
+                dropdown.appendChild(option);
             });
-
-            if (!dropdown.childNodes.length) {
-                alert('You do not own any clubs to add books to.');
-                return null;
-            }
 
             const confirmButton = document.createElement('button');
             confirmButton.textContent = 'Confirm';
             confirmButton.addEventListener('click', () => {
                 const selectedClubId = dropdown.value;
-                document.body.removeChild(dropdownContainer);
+                dropdownContainer.remove();
                 resolve(selectedClubId);
             });
 
@@ -275,12 +578,255 @@ async function selectClub() {
         return null;
     }
 }
+const fetchPersonalLibrary = async () => {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('You must be logged in to view your personal library.');
+        return;
+    }
 
+    try {
+        const response = await fetch('http://localhost:3000/api/user/library', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
 
+        if (!response.ok) {
+            const result = await response.json();
+            console.error('Error fetching personal library:', result);
+            alert('Error fetching personal library. Check the console for details.');
+            return;
+        }
+
+        const library = await response.json();
+        console.log('Personal library:', library);
+        // Populate your dropdown or UI with the library data
+    } catch (error) {
+        console.error('Error fetching personal library:', error);
+        alert('Error fetching personal library. Check the console for details.');
+    }
+};
+// Select Book for Personal Deletion
+async function selectBookForPersonalDeletion() {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('You must be logged in to delete a book from your personal library.');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/api/user/library', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+            const result = await response.json();
+            console.error('Error fetching personal library:', result);
+            alert('Error fetching personal library: ' + (result.message || 'Unknown error'));
+            return;
+        }
+
+        const books = await response.json();
+        if (!books.length) {
+            alert('No books in your personal library to delete.');
+            return;
+        }
+
+        const deletePersonalBookContainer = document.getElementById('deletePersonalBookContainer');
+        const existingDropdown = document.getElementById('bookSelectForPersonalDelete');
+        if (existingDropdown) existingDropdown.remove();
+
+        const dropdown = document.createElement('select');
+        dropdown.id = 'bookSelectForPersonalDelete';
+
+        books.forEach((book) => {
+            const option = document.createElement('option');
+            option.value = book._id;
+            option.textContent = book.title;
+            dropdown.appendChild(option);
+        });
+
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = 'Delete Book';
+        confirmButton.type = 'button';
+        confirmButton.addEventListener('click', () => {
+            const selectedBookId = dropdown.value;
+            deleteBookFromPersonalLibrary(selectedBookId);
+            dropdown.remove();
+            confirmButton.remove();
+        });
+
+        deletePersonalBookContainer.appendChild(dropdown);
+        deletePersonalBookContainer.appendChild(confirmButton);
+    } catch (error) {
+        console.error('Error fetching personal library:', error);
+        alert('Error fetching personal library. Check the console for details.');
+    }
+}
+// Delete Book from Personal Library
+async function deleteBookFromPersonalLibrary(bookId) {
+    const token = localStorage.getItem('jwtToken');
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/user/library/${bookId}/delete`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Book deleted from personal library successfully!');
+        } else {
+            alert('Error deleting book: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error deleting book from personal library:', error);
+    }
+}
+// Select Book for Club Deletion
+async function selectBookForClubDeletion() {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('You must be logged in to delete a book from a club library.');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/api/club/my-clubs', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+            const result = await response.json();
+            console.error('Error fetching clubs:', result);
+            alert('Error fetching clubs: ' + (result.message || 'Unknown error'));
+            return;
+        }
+
+        const clubs = await response.json();
+        const ownedClubs = clubs.filter((club) => club.role === 'Owner');
+        if (!ownedClubs.length) {
+            alert('You do not own any clubs with books to delete.');
+            return;
+        }
+
+        const deleteClubBookContainer = document.getElementById('deleteClubBookContainer');
+        const existingDropdown = document.getElementById('clubSelectForBookDelete');
+        if (existingDropdown) existingDropdown.remove();
+
+        const dropdown = document.createElement('select');
+        dropdown.id = 'clubSelectForBookDelete';
+
+        ownedClubs.forEach((club) => {
+            const option = document.createElement('option');
+            option.value = club._id;
+            option.textContent = club.name;
+            dropdown.appendChild(option);
+        });
+
+        const confirmButton = document.createElement('button');
+        confirmButton.textContent = 'Select Club';
+        confirmButton.type = 'button';
+        confirmButton.addEventListener('click', () => {
+            const selectedClubId = dropdown.value;
+            dropdown.remove();
+            confirmButton.remove();
+            fetchBooksInClub(selectedClubId);
+        });
+
+        deleteClubBookContainer.appendChild(dropdown);
+        deleteClubBookContainer.appendChild(confirmButton);
+    } catch (error) {
+        console.error('Error fetching clubs:', error);
+        alert('Error fetching clubs. Check the console for details.');
+    }
+}
+// Fetch Books in Club
+async function fetchBooksInClub(clubId) {
+    const token = localStorage.getItem('jwtToken');
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/club/${clubId}/library`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+            const result = await response.json();
+            console.error('Error fetching club library:', result);
+            alert('Error fetching club library: ' + (result.message || 'Unknown error'));
+            return;
+        }
+
+        const books = await response.json();
+        if (!books.length) {
+            alert('No books in this club library to delete.');
+            return;
+        }
+
+        const deleteClubBookContainer = document.getElementById('deleteClubBookContainer');
+
+        const bookDropdown = document.createElement('select');
+        bookDropdown.id = 'bookSelectForClubDelete';
+
+        books.forEach((book) => {
+            const option = document.createElement('option');
+            option.value = book._id;
+            option.textContent = book.title;
+            bookDropdown.appendChild(option);
+        });
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete Book';
+        deleteButton.type = 'button';
+        deleteButton.addEventListener('click', () => {
+            const selectedBookId = bookDropdown.value;
+            deleteBookFromClubLibrary(clubId, selectedBookId);
+            bookDropdown.remove();
+            deleteButton.remove();
+        });
+
+        deleteClubBookContainer.appendChild(bookDropdown);
+        deleteClubBookContainer.appendChild(deleteButton);
+    } catch (error) {
+        console.error('Error fetching books in club:', error);
+    }
+}
+// Delete selected Book from Club Library
+async function deleteBookFromClubLibrary(clubId, bookId) {
+    const token = localStorage.getItem('jwtToken');
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/club/${clubId}/library/${bookId}/delete`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Book deleted from club library successfully!');
+        } else {
+            alert('Error deleting book: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error deleting book from club library:', error);
+    }
+}
         // Attach event listeners
+        document.getElementById('deleteUserButton').addEventListener('click', deleteUserAccount);
+        document.getElementById('updateUserButton').addEventListener('click', updateUserInfo);
         document.getElementById('loginForm').addEventListener('submit', submitLoginForm);
         document.getElementById('createClubButton').addEventListener('click', submitCreateClubForm);
         document.getElementById('searchBooksButton').addEventListener('click', searchBooks);
+        document.getElementById('selectClubToUpdateButton').addEventListener('click', selectClubForUpdate);
+        document.getElementById('updateClubButton').addEventListener('click', updateSelectedClub);
+        document.getElementById('selectClubToDeleteButton').addEventListener('click', selectClubForDeletion);
+        document.getElementById('selectBookToDeleteFromPersonal').addEventListener('click', selectBookForPersonalDeletion);
+        document.getElementById('selectBookToDeleteFromClub').addEventListener('click', selectBookForClubDeletion);
     </script>
 </body>
 </html>

@@ -2,7 +2,9 @@
 
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import User, { IUser } from '../models/userSchema';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
 type UserObject = Omit<IUser, 'password'> & { password?: string };
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
@@ -60,5 +62,73 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({ message: 'Login successful', token, user: userObject });
     } catch (error) {
         res.status(500).json({ error: error instanceof Error ? error.message : 'Error logging in' });
+    }
+};
+
+export const updateUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const userId = req.user?.id; // Ensure user exists
+    const { username, email, password } = req.body;
+
+    try {
+        const updateData: Partial<{ username: string; email: string; password: string }> = {};
+        if (username) updateData.username = username;
+        if (email) updateData.email = email;
+
+        // Hash the new password if provided
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            updateData.password = await bcrypt.hash(password, salt);
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.status(200).json({ message: 'User updated successfully', user: updatedUser });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: 'Error updating user', error });
+    }
+};
+
+
+export const deleteUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const userId = req.user?.id;
+
+    try {
+        const deletedUser = await User.findByIdAndDelete(userId);
+
+        if (!deletedUser) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.status(200).json({ message: 'User account deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting user account:', error);
+        res.status(500).json({ message: 'Error deleting user account', error });
+    }
+};
+export const getUserLibrary = async (req: Request, res: Response): Promise<void> => {
+    const userId = (req as AuthenticatedRequest).user?.id;
+
+    try {
+        const user = await User.findById(userId).populate('library', 'title authors thumbnail description');
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.status(200).json(user.library);
+    } catch (error) {
+        console.error('Error fetching user library:', error);
+        res.status(500).json({ message: 'Error fetching user library' });
     }
 };
