@@ -7,6 +7,7 @@
 </head>
 <body>
     <h1>API Testing Form</h1>
+
     <!-- Create User -->
     <h2>Create User</h2>
     <form action="http://localhost:3000/api/users/create" method="POST">
@@ -46,7 +47,7 @@
         <label for="roomKey">Room Key:</label>
         <input type="text" name="roomKey" id="roomKey" required><br>
 
-        <button type="button" id="createClubButton">Create Club</button> <!-- Change to 'button' type -->
+        <button type="button" id="createClubButton">Create Club</button>
     </form>
 
     <!-- Search Google Books -->
@@ -56,32 +57,25 @@
         <input type="text" name="query" id="query" required>
         <button type="button" id="searchBooksButton">Search</button>
     </form>
-        <div id="searchResults"></div>
+    <div id="searchResults"></div>
 
     <script>
         // Login form submission
         async function submitLoginForm(event) {
-            event.preventDefault(); // Prevent default form submission
-
+            event.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
             try {
                 const response = await fetch('http://localhost:3000/api/users/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password }),  // Send email and password
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
                 });
-
                 const result = await response.json();
-
                 if (response.ok) {
-                    // Store the token in localStorage
                     localStorage.setItem('jwtToken', result.token);
                     alert('Login successful');
-                    console.log('Token:', result.token);
                 } else {
                     alert('Login failed: ' + result.message);
                 }
@@ -91,44 +85,35 @@
             }
         }
 
-        // Create club form submission
+        // Create Club
         async function submitCreateClubForm(event) {
-            event.preventDefault(); // Prevent default form submission
-
-            const form = document.getElementById('createClubForm');
-            const formData = new FormData(form);
-            const data = {
-                name: formData.get('name'),
-                description: formData.get('description'),
-                roomKey: formData.get('roomKey')
-            };
-
-            // Get the token from localStorage
+            event.preventDefault();
             const token = localStorage.getItem('jwtToken');
             if (!token) {
                 alert('No token found. Please login first.');
                 return;
             }
 
-            console.log("Submitting create club with data:", data);
+            const form = document.getElementById('createClubForm');
+            const data = {
+                name: form.name.value,
+                description: form.description.value,
+                roomKey: form.roomKey.value,
+            };
 
-            // Send the data to the backend with the Authorization header
             try {
                 const response = await fetch('http://localhost:3000/api/club/create', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,  // Send the JWT token in the header
+                        'Authorization': `Bearer ${token}`,
                     },
                     body: JSON.stringify(data),
                 });
-
                 const result = await response.json();
                 if (response.ok) {
-                    console.log('Club created successfully:', result);
                     alert('Club created successfully!');
                 } else {
-                    console.error('Error creating club:', result.message);
                     alert('Error creating club: ' + result.message);
                 }
             } catch (error) {
@@ -136,83 +121,69 @@
             }
         }
 
-        // Attach event listeners to forms
-        document.getElementById('loginForm').addEventListener('submit', submitLoginForm);
-        document.getElementById('createClubButton').addEventListener('click', submitCreateClubForm); // Attach to the correct button
-
-        // Search Google Books API
+        // Search Books
         async function searchBooks(event) {
-    event.preventDefault();
+            event.preventDefault();
+            const query = document.getElementById('query').value;
 
-    const query = document.getElementById('query').value;
-    try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
+            if (!query) {
+                alert('Please enter a search term.');
+                return;
+            }
 
-        const resultsContainer = document.getElementById('searchResults');
-        resultsContainer.innerHTML = '';
+            try {
+                const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
 
-        if (data.items && data.items.length > 0) {
-            data.items.forEach(book => {
-                const bookDiv = document.createElement('div');
+                const resultsContainer = document.getElementById('searchResults');
+                resultsContainer.innerHTML = '';
 
-                const addToUserButton = document.createElement('button');
-                addToUserButton.textContent = 'Add to My Library';
-                addToUserButton.addEventListener('click', () => {
-                    addBookToLibrary(book.id, 'user');
-                });
+                if (data.items && data.items.length > 0) {
+                    data.items.forEach((book) => {
+                        const bookDiv = document.createElement('div');
 
-                const addToClubButton = document.createElement('button');
-                addToClubButton.textContent = 'Add to Club Library';
+                        const addToUserButton = document.createElement('button');
+                        addToUserButton.textContent = 'Add to My Library';
+                        addToUserButton.addEventListener('click', () => {
+                            addBookToLibrary(book.id, 'user');
+                        });
 
-                addToClubButton.addEventListener('click', async () => {
-                const clubId = await selectClub(); // Call a function to fetch and select a club
-                if (clubId) {
-                addBookToLibrary(book.id, 'club', clubId);
-                    }
-                });
+                        const addToClubButton = document.createElement('button');
+                        addToClubButton.textContent = 'Add to Club Library';
+                        addToClubButton.addEventListener('click', async () => {
+                            const clubId = await selectClub();
+                            if (clubId) {
+                                addBookToLibrary(book.id, 'club', clubId);
+                            }
+                        });
 
-                bookDiv.innerHTML = `
-                    <p><strong>${book.volumeInfo.title}</strong> by ${book.volumeInfo.authors?.join(', ') || 'Unknown'}</p>
-                `;
-                bookDiv.appendChild(addToUserButton);
-                bookDiv.appendChild(addToClubButton);
+                        bookDiv.innerHTML = `
+                            <p><strong>${book.volumeInfo.title}</strong> by ${book.volumeInfo.authors?.join(', ') || 'Unknown'}</p>
+                        `;
+                        bookDiv.appendChild(addToUserButton);
+                        bookDiv.appendChild(addToClubButton);
 
-                resultsContainer.appendChild(bookDiv);
-            });
-        } else {
-            resultsContainer.innerHTML = '<p>No results found.</p>';
+                        resultsContainer.appendChild(bookDiv);
+                    });
+                } else {
+                    resultsContainer.innerHTML = '<p>No results found.</p>';
+                }
+            } catch (error) {
+                console.error('Error searching Google Books:', error);
+                alert('Error searching books.');
+            }
         }
-    } catch (error) {
-        console.error('Error searching Google Books:', error);
-    }
-}
-document.getElementById('searchBooksButton').addEventListener('click', searchBooks);
 
-
-// Add book to library
-async function addBookToLibrary(bookId, targetType, clubId = null) {
-    console.log('addBookToLibrary called with:', bookId, targetType, clubId);
-
+        // Add Book to Library
+        async function addBookToLibrary(bookId, targetType, clubId = null) {
     const token = localStorage.getItem('jwtToken');
     if (!token) {
         alert('You must be logged in to add books.');
         return;
     }
 
-    const payload = {
-        googleId: bookId,
-        targetType,
-    };
-
-    // Add `clubId` to the payload if the target type is "club"
-    if (targetType === 'club') {
-        if (!clubId) {
-            alert('Club ID is required to add a book to a club.');
-            return;
-        }
-        payload.clubId = clubId;
-    }
+    const payload = { googleId: bookId, targetType };
+    if (targetType === 'club') payload.clubId = clubId;
 
     try {
         const response = await fetch('http://localhost:3000/api/books/add', {
@@ -225,10 +196,10 @@ async function addBookToLibrary(bookId, targetType, clubId = null) {
         });
 
         const result = await response.json();
-        console.log('Backend Response:', result);
-
         if (response.ok) {
             alert('Book added successfully!');
+        } else if (response.status === 403) {
+            alert('Only the club owner can add books to this club.');
         } else {
             alert('Error adding book: ' + result.message);
         }
@@ -237,7 +208,8 @@ async function addBookToLibrary(bookId, targetType, clubId = null) {
     }
 }
 
-// Fetch clubs and allow user to select one
+      // Select Club
+// Fetch clubs and allow the user to select one
 async function selectClub() {
     const token = localStorage.getItem('jwtToken');
     if (!token) {
@@ -248,9 +220,7 @@ async function selectClub() {
     try {
         const response = await fetch('http://localhost:3000/api/club/my-clubs', {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
+            headers: { 'Authorization': `Bearer ${token}` },
         });
 
         if (!response.ok) {
@@ -261,72 +231,56 @@ async function selectClub() {
 
         const clubs = await response.json();
 
-        // Create a dropdown to select a club
-        const dropdown = document.createElement('select');
-        dropdown.id = 'clubSelect';
-        dropdown.innerHTML = clubs
-            .map(club => `<option value="${club._id}">${club.name}</option>`)
-            .join('');
-        
-        // Show the dropdown to the user
-        const confirmButton = document.createElement('button');
-        confirmButton.textContent = 'Confirm';
-        confirmButton.addEventListener('click', () => {
-            const selectedClubId = document.getElementById('clubSelect').value;
-            document.body.removeChild(dropdownContainer); // Remove dropdown from DOM
-            resolve(selectedClubId); // Return the selected club ID
-        });
+        if (clubs.length === 0) {
+            alert('No clubs available to select.');
+            return null;
+        }
 
-        const dropdownContainer = document.createElement('div');
-        dropdownContainer.appendChild(dropdown);
-        dropdownContainer.appendChild(confirmButton);
+        return new Promise((resolve) => {
+            const dropdownContainer = document.createElement('div');
+            dropdownContainer.id = 'clubDropdownContainer';
 
-        document.body.appendChild(dropdownContainer);
+            const dropdown = document.createElement('select');
+            dropdown.id = 'clubSelect';
 
-        return new Promise(resolve => {
-            confirmButton.addEventListener('click', () => {
-                resolve(dropdown.value);
+            clubs.forEach((club) => {
+                if (club.role === 'Owner') { // Filter to only show clubs where the user is the owner
+                    const option = document.createElement('option');
+                    option.value = club._id;
+                    option.textContent = club.name;
+                    dropdown.appendChild(option);
+                }
             });
+
+            if (!dropdown.childNodes.length) {
+                alert('You do not own any clubs to add books to.');
+                return null;
+            }
+
+            const confirmButton = document.createElement('button');
+            confirmButton.textContent = 'Confirm';
+            confirmButton.addEventListener('click', () => {
+                const selectedClubId = dropdown.value;
+                document.body.removeChild(dropdownContainer);
+                resolve(selectedClubId);
+            });
+
+            dropdownContainer.appendChild(dropdown);
+            dropdownContainer.appendChild(confirmButton);
+            document.body.appendChild(dropdownContainer);
         });
     } catch (error) {
         console.error('Error fetching clubs:', error);
-        alert('Error fetching clubs');
+        alert('Error fetching clubs. Check the console for details.');
         return null;
     }
 }
-// Add book to club library
-async function addBookToClubLibrary(bookId, clubId) {
-    console.log('addBookToClubLibrary called with:', bookId, clubId);
 
-    const token = localStorage.getItem('jwtToken');
-    if (!token) {
-        alert('You must be logged in to add books.');
-        return;
-    }
 
-    try {
-        const response = await fetch(`http://localhost:3000/api/club/${clubId}/add-book`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({ bookId }), // Send bookId in the body
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            alert('Book added to club library successfully!');
-        } else {
-            console.error('Error adding book to club library:', result.message);
-            alert(`Error: ${result.message}`);
-        }
-    } catch (error) {
-        console.error('Error adding book to club library:', error);
-        alert('An error occurred while adding the book to the club library.');
-    }
-}
-
+        // Attach event listeners
+        document.getElementById('loginForm').addEventListener('submit', submitLoginForm);
+        document.getElementById('createClubButton').addEventListener('click', submitCreateClubForm);
+        document.getElementById('searchBooksButton').addEventListener('click', searchBooks);
     </script>
 </body>
 </html>

@@ -64,9 +64,6 @@ export const searchBooks = async (req: Request, res: Response): Promise<void> =>
 
 
 export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    console.log('Request Body:', req.body);
-    console.log('Authenticated User ID:', req.user?.id);
-
     const { googleId, targetType, clubId } = req.body;
     const userId = req.user?.id;
 
@@ -80,9 +77,13 @@ export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response)
         let book = await Book.findOne({ googleId });
 
         if (!book) {
-            const response = await axios.get<{ volumeInfo: GoogleBook['volumeInfo'] }>(`${GOOGLE_BOOKS_API_URL}/${googleId}`);
+            // Fetch book details from Google Books API
+            const response = await axios.get<{ volumeInfo: GoogleBook['volumeInfo'] }>(
+                `${GOOGLE_BOOKS_API_URL}/${googleId}`
+            );
             const bookData = response.data.volumeInfo;
 
+            // Create a new book entry
             book = new Book({
                 googleId,
                 title: bookData.title,
@@ -96,7 +97,10 @@ export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response)
         }
 
         if (targetType === 'user') {
-            await User.findByIdAndUpdate(userObjectId, { $addToSet: { library: book._id } });
+            // Add the book to the user's library
+            await User.findByIdAndUpdate(userObjectId, {
+                $addToSet: { library: book._id },
+            });
         } else if (targetType === 'club') {
             if (!clubId) {
                 res.status(400).json({ message: 'Club ID is required for club target' });
@@ -111,12 +115,16 @@ export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response)
                 return;
             }
 
-            if (String(club.owner) !== userId && !club.members.map(String).includes(userId)) {
+            // Check if the user is the owner of the selected club
+            if (String(club.owner) !== userId) {
                 res.status(403).json({ message: 'You are not authorized to add books to this club' });
                 return;
             }
 
-            await Club.findByIdAndUpdate(clubObjectId, { $addToSet: { books: book._id } });
+            // Add the book to the club's books array
+            await Club.findByIdAndUpdate(clubObjectId, {
+                $addToSet: { books: book._id },
+            });
         } else {
             res.status(400).json({ message: 'Invalid target type' });
             return;
@@ -124,11 +132,8 @@ export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response)
 
         res.status(201).json({ message: 'Book added successfully', book });
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.status(500).json({ error: 'Error adding book to library' });
-        }
+        console.error('Error adding book to library:', error);
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Error adding book to library' });
     }
 };
 

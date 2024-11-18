@@ -9,7 +9,9 @@ export interface IUser extends Document {
     password: string;
     createdAt?: Date;
     comparePassword: (candidatePassword: string) => Promise<boolean>;
-    joinedClubs: mongoose.Types.ObjectId[]; // Array of club IDs
+    joinedClubs: mongoose.Types.ObjectId[]; // Clubs joined by the user
+    createdClubs: mongoose.Types.ObjectId[]; // Clubs created by the user
+    library: mongoose.Types.ObjectId[]; // Books in the user's personal library
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -17,7 +19,9 @@ const UserSchema: Schema<IUser> = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
-    joinedClubs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Club' }] // Array of references to Club
+    joinedClubs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Club' }], // Clubs joined
+    createdClubs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Club' }], // Clubs created by the user
+    library: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }], // Personal library of books
 });
 
 // Pre-save hook for password hashing

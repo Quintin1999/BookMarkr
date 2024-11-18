@@ -5,7 +5,12 @@ import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import Club from '../models/clubSchema';
 import User from '../models/userSchema';
 import Book from '../models/bookSchema';
-import mongoose from 'mongoose';
+
+interface PopulatedClub {
+    _id: string; // or mongoose.Types.ObjectId if you prefer
+    name: string;
+    description: string;
+}
 
 // Create a new club
 export const createClub = async (req: Request, res: Response): Promise<void> => {
@@ -30,16 +35,16 @@ export const createClub = async (req: Request, res: Response): Promise<void> => 
             name,
             description,
             roomKey,
-            owner: new mongoose.Types.ObjectId(userId), // Ensure owner is stored as ObjectId
+            owner: userId,
         });
 
         // Save the club in the database
         await newClub.save();
 
-        // Add the club to the user's joinedClubs array
+        // Update user's createdClubs array
         await User.findByIdAndUpdate(
             userId,
-            { $addToSet: { joinedClubs: newClub._id } }, // Add the club to joinedClubs only if not already there
+            { $addToSet: { createdClubs: newClub._id } }, // Add the club to createdClubs array
             { new: true } // Return the updated document
         );
 
@@ -165,18 +170,54 @@ export const getUserClubs = async (req: AuthenticatedRequest, res: Response): Pr
     const userId = req.user?.id;
 
     if (!userId) {
-        console.error('User ID not found in request');
+        console.error('No authenticated user ID found');
         res.status(401).json({ message: 'User is not authenticated' });
         return;
     }
 
     try {
-        console.log('Fetching clubs for User ID:', userId);
-        const clubs = await Club.find({ owner: userId }); // Adjust this query as needed
-        console.log('Clubs found:', clubs); // Log the fetched clubs
+        console.log('Fetching user clubs for User ID:', userId);
+
+        // Fetch the user document with populated clubs
+        const user = await User.findById(userId)
+            .populate<{ createdClubs: PopulatedClub[] }>('createdClubs', 'name description')
+            .populate<{ joinedClubs: PopulatedClub[] }>('joinedClubs', 'name description');
+
+        // Log the raw user document
+        console.log('Raw user document:', user);
+
+        if (!user) {
+            console.error('No user found for ID:', userId);
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        // Format the response
+        const clubs = [
+            ...(user.createdClubs ?? []).map((club) => ({
+                _id: club._id.toString(),
+                name: club.name,
+                description: club.description,
+                role: 'Owner',
+            })),
+            ...(user.joinedClubs ?? []).map((club) => ({
+                _id: club._id.toString(),
+                name: club.name,
+                description: club.description,
+                role: 'Member',
+            })),
+        ];
+
+        // Log the formatted clubs
+        console.log('Formatted clubs:', clubs);
+
         res.status(200).json(clubs);
     } catch (error) {
-        console.error('Error fetching user clubs:', error); // Log the error
-        res.status(500).json({ message: 'Error fetching user clubs', error });
+        console.error('Error in getUserClubs:', error);
+        res.status(500).json({ message: 'Error fetching user clubs' });
     }
 };
+
+
+
+
