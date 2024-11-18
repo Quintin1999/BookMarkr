@@ -2,7 +2,7 @@
 
 import express from 'express';
 import { authenticate } from '../middleware/authMiddleware';
-import { createUser, loginUser,updateUser,deleteUser,getUserLibrary } from '../controllers/userController';
+import { createUser, loginUser,updateUser,deleteUser,getUserLibrary,deleteBookFromUserLibrary } from '../controllers/userController';
 
 const router = express.Router();
 
@@ -20,4 +20,8 @@ router.delete('/delete', authenticate, deleteUser);
 
 //User library route
 router.get('/library', authenticate, getUserLibrary);
+
+//delete book from user library
+router.delete('/library/:bookId/delete', authenticate, deleteBookFromUserLibrary);
+
 export default router;

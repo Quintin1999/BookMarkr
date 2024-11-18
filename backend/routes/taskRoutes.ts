@@ -1,14 +1,21 @@
-import express, { Request, Response } from 'express';  // Import types
+// backend/routes/taskRoutes.ts
+
+import express from 'express';
+import {
+    addTask,
+    getTasksForBook,
+    getUserTasks,
+    updateTask,
+    deleteTask,
+} from '../controllers/taskController';
+import { authenticate } from '../middleware/authMiddleware';
+
 const router = express.Router();
 
-// Define routes with explicit typing for req and res
-router.post('/', (_req: Request, res: Response) => {  // Use _req to signal it's unused
-    res.send('Task route');
-});
-
-router.get('/:bookId', (req: Request<{ bookId: string }>, res: Response) => {
-    const { bookId } = req.params;  // Access the bookId from the route parameters
-    res.send(`Get tasks for book with ID: ${bookId}`);
-});
+router.post('/create', authenticate, addTask);          // Create a new task
+router.get('/book/:bookId', authenticate, getTasksForBook); // Get tasks for a specific book
+router.get('/user', authenticate, getUserTasks);        // Get tasks for the authenticated user
+router.put('/:taskId', authenticate, updateTask);       // Update a specific task
+router.delete('/:taskId', authenticate, deleteTask);    // Delete a specific task
 
 export default router;

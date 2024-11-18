@@ -123,7 +123,7 @@ export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response)
 
             // Add the book to the club's books array
             await Club.findByIdAndUpdate(clubObjectId, {
-                $addToSet: { books: book._id },
+                $addToSet: { library: book._id },
             });
         } else {
             res.status(400).json({ message: 'Invalid target type' });

@@ -132,3 +132,27 @@ export const getUserLibrary = async (req: Request, res: Response): Promise<void>
         res.status(500).json({ message: 'Error fetching user library' });
     }
 };
+export const deleteBookFromUserLibrary = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const userId = req.user?.id; // Get the authenticated user ID
+    const { bookId } = req.params; // Extract the book ID from the URL
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        // Remove the book from the user's library
+        const updatedLibrary = user.library.filter((id) => id.toString() !== bookId);
+        user.library = updatedLibrary;
+
+        // Save the updated user document
+        await user.save();
+
+        res.status(200).json({ message: 'Book removed from library successfully' });
+    } catch (error) {
+        console.error('Error removing book from library:', error);
+        res.status(500).json({ message: 'Error removing book from library' });
+    }
+};
