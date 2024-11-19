@@ -1,15 +1,26 @@
-import express, { Request, Response } from 'express';  
+import express from 'express';
+import {
+    addComment,
+    getCommentsForBookTasks,
+    updateComment,
+    deleteComment,
+    likeComment,
+    dislikeComment,
+} from '../controllers/commentController';
+import { authenticate } from '../middleware/authMiddleware';
+
 const router = express.Router();
 
-// Define routes
-router.post('/', (req: Request, res: Response) => {
-    const { content } = req.body; 
-    res.send(`Comment added with content: ${content}`);
-});
+router.post('/',authenticate, addComment as express.RequestHandler);
 
-router.patch('/:commentId/like', (req: Request<{ commentId: string }>, res: Response) => {
-    const { commentId } = req.params;
-    res.send(`Like comment with ID: ${commentId}`);
-});
+router.get('/task/:taskId', getCommentsForBookTasks);
+
+router.put('/:commentId', updateComment);
+
+router.delete('/:commentId', deleteComment);
+
+router.patch('/:commentId/like', likeComment);
+
+router.patch('/:commentId/dislike', dislikeComment);
 
 export default router;

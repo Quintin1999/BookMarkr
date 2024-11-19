@@ -150,7 +150,49 @@
      <button type = "button" id="createTaskClubButton">Create Task</button>
  </form>
 
+ <h2>Select Library Type</h2>
+<form id="libraryTypeForm">
+  <label>
+    <input type="radio" name="libraryType" value="personal" checked />
+    Personal Library
+  </label>
+  <label>
+    <input type="radio" name="libraryType" value="club" />
+    Club Library
+  </label>
+</form>
+
+<!-- Club Selection -->
+<div id="clubSelectionContainer" style="display: none;">
+  <label for="clubSelect">Select Club:</label>
+  <select id="clubSelect"></select>
+</div>
+
+<!-- Book Selection -->
+<h2>Select Book</h2>
+<div>
+  <label for="bookSelect">Select Book:</label>
+  <select id="bookSelect"></select>
+</div>
+
+<!-- Task Selection -->
+<h2>Select Task</h2>
+<div>
+  <label for="taskSelect">Select Task:</label>
+  <select id="taskSelect"></select>
+</div>
+
+<!-- Add Comment -->
+<h2>Add Comment</h2>
+<form id="addCommentForm">
+  <label for="commentContent">Comment:</label>
+  <textarea id="commentContent" required></textarea>
+  <button type="button" id="addCommentButton">Add Comment</button>
+</form>
+
+
     <script>
+      const apiUrl = "http://localhost:3000/api"; 
 // token management
 function getAuthToken() {
     const token = localStorage.getItem("jwtToken");
@@ -1203,6 +1245,244 @@ async function createTaskForClubBook(event) {
     alert("Error creating club task.");
   }
 }
+
+//add comment to task
+async function addCommentToTask() {
+  const token = getAuthToken();
+  const taskId = document.getElementById("taskSelect").value;
+  const bookId = document.getElementById("bookSelect").value;
+  const content = document.getElementById("commentContent").value;
+
+  // Log the payload to verify
+  console.log("Payload to be sent:", { taskId, bookId, content });
+
+  // Validate required fields
+  if (!taskId || !bookId || !content) {
+    alert("Please fill in all fields before adding a comment.");
+    return;
+  }
+
+  try {
+    const response = await fetch(`${apiUrl}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ taskId, bookId, content }),
+    });
+
+    if (response.ok) {
+      alert("Comment added successfully!");
+      document.getElementById("commentContent").value = ""; // Clear the input
+    } else {
+      const error = await response.json();
+      console.error("Backend error response:", error); // Debugging backend error
+      alert(`Error: ${error.message}`);
+    }
+  } catch (error) {
+    console.error("Error adding comment:", error);
+  }
+}
+// Fetch Clubs or Personal Library
+async function fetchLibraries(libraryType, clubId = null) {
+  const token = getAuthToken();
+  const endpoint =
+    libraryType === "club" && clubId
+      ? `${apiUrl}/club/${clubId}/library`
+      : `${apiUrl}/users/library`;
+
+  console.log("Fetching from endpoint:", endpoint); // Debugging
+
+  const response = await fetch(endpoint, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text(); // Capture error response
+    console.error("Error response from API:", errorText); // Debugging
+    throw new Error(`Failed to fetch library: ${errorText}`);
+  }
+
+  const data = await response.json();
+  console.log("Fetched library data:", data); // Debugging
+  return data;
+}
+
+// Fetch Clubs
+async function fetchClubsForComments() {
+  const token = getAuthToken();
+  try {
+    const response = await fetch(`${apiUrl}/club/my-clubs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text(); // Debugging
+      console.error("Error response from API (comments fetch):", errorText);
+      throw new Error("Failed to fetch clubs for comments.");
+    }
+
+    const clubs = await response.json();
+    console.log("Fetched clubs for comments:", clubs); // Debugging
+    return clubs;
+  } catch (error) {
+    console.error("Error fetching clubs for comments:", error);
+    throw error;
+  }
+}
+
+// Fetch Tasks for a Book
+async function fetchTasksForBook(bookId) {
+  const token = getAuthToken();
+
+  try {
+    const response = await fetch(`${apiUrl}/tasks/book/${bookId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text(); // Debugging
+      console.error("Error response from API (tasks fetch):", errorText);
+      throw new Error("Failed to fetch tasks for the selected book.");
+    }
+
+    const tasks = await response.json();
+    console.log("Fetched tasks for book:", tasks); // Debugging
+    return tasks;
+  } catch (error) {
+    console.error("Error in fetchTasksForBook:", error);
+    throw error;
+  }
+}
+// Populate dropdowns
+function populateDropdown(dropdownId, items, textKey, valueKey) {
+  const dropdown = document.getElementById(dropdownId);
+  dropdown.innerHTML = ""; // Clear existing options
+
+  if (!items.length) {
+    const option = document.createElement("option");
+    option.textContent = "No items available";
+    option.disabled = true;
+    dropdown.appendChild(option);
+    return;
+  }
+
+  items.forEach((item) => {
+    const option = document.createElement("option");
+    option.value = item[valueKey];
+    option.textContent = item[textKey];
+    dropdown.appendChild(option);
+  });
+}
+// Handle library type change
+document.getElementById("libraryTypeForm").addEventListener("change", async (event) => {
+  const libraryType = event.target.value; // personal or club
+  const clubContainer = document.getElementById("clubSelectionContainer");
+  const bookDropdown = document.getElementById("bookSelect");
+  const taskDropdown = document.getElementById("taskSelect");
+
+  // Clear dropdowns
+  populateDropdown("bookSelect", [], "title", "_id");
+  populateDropdown("taskSelect", [], "description", "_id");
+
+  if (libraryType === "club") {
+    clubContainer.style.display = "block";
+
+    try {
+      const clubs = await fetchClubsForComments(); // Use new function
+      populateDropdown("clubSelect", clubs, "name", "_id");
+    } catch (error) {
+      console.error("Error fetching clubs for comments:", error);
+    }
+  } else {
+    clubContainer.style.display = "none";
+
+    try {
+      const books = await fetchLibraries("personal");
+      populateDropdown("bookSelect", books, "title", "_id");
+    } catch (error) {
+      console.error("Error fetching personal books:", error);
+    }
+  }
+});
+
+// Handle club selection change
+document.getElementById("clubSelect").addEventListener("change", async () => {
+  const clubId = document.getElementById("clubSelect").value;
+
+  if (!clubId) {
+    console.warn("No club selected.");
+    return;
+  }
+
+  console.log("Fetching books for selected club ID (comments):", clubId);
+
+  try {
+    populateDropdown("bookSelect", [], "title", "_id"); // Clear existing
+    const books = await fetchLibraries("club", clubId);
+    console.log("Books fetched for club:", books); // Debugging
+    populateDropdown("bookSelect", books, "title", "_id");
+  } catch (error) {
+    console.error("Error fetching books for selected club (comments):", error);
+  }
+});
+
+// Handle book selection change
+document.getElementById("bookSelect").addEventListener("change", async () => {
+  const bookId = document.getElementById("bookSelect").value;
+
+  if (!bookId) {
+    console.warn("No book selected.");
+    return;
+  }
+
+  console.log("Fetching tasks for selected book ID:", bookId);
+
+  try {
+    populateDropdown("taskSelect", [], "description", "_id"); // Clear existing tasks
+    const tasks = await fetchTasksForBook(bookId);
+    console.log("Tasks fetched for book:", tasks); // Debug fetched tasks
+    populateDropdown("taskSelect", tasks, "description", "_id");
+  } catch (error) {
+    console.error("Error fetching tasks for the selected book:", error);
+  }
+});
+// Add Comment
+document.getElementById("addCommentButton").addEventListener("click", async () => {
+  const taskId = document.getElementById("taskSelect").value;
+  const bookId = document.getElementById("bookSelect").value;
+  const content = document.getElementById("commentContent").value;
+
+  if (!taskId || !bookId || !content) {
+    alert("All fields are required to add a comment.");
+    return;
+  }
+
+  console.log("Submitting comment payload:", { taskId, bookId, content });
+
+  try {
+    const response = await fetch(`${apiUrl}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+      body: JSON.stringify({ taskId, bookId, content }),
+    });
+
+    if (response.ok) {
+      alert("Comment added successfully!");
+      document.getElementById("commentContent").value = ""; // Clear input
+    } else {
+      const error = await response.json();
+      console.error("Backend error:", error);
+      alert(`Error adding comment: ${error.message}`);
+    }
+  } catch (error) {
+    console.error("Error adding comment:", error);
+  }
+});
       // Attach event listeners
       document
         .getElementById("deleteUserButton")

@@ -1,6 +1,6 @@
 // backend/controllers/taskController.ts
 
-import { Request, Response } from 'express';
+import { Request, Response, RequestHandler } from 'express';
 import Task from '../models/taskSchema';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
@@ -26,17 +26,20 @@ export const addTask = async (req: AuthenticatedRequest, res: Response): Promise
 };
 
 // Get all tasks for a specific book
-export const getTasksForBook = async (req: Request, res: Response): Promise<void> => {
+export const getTasksForBook: RequestHandler = async (req, res) => {
     const { bookId } = req.params;
 
     try {
         const tasks = await Task.find({ bookId }).populate('comments');
+        if (!tasks || tasks.length === 0) {
+            res.status(404).json({ message: `No tasks found for book ID: ${bookId}` });
+            return; // Ensure no further code runs after sending a response
+        }
         res.status(200).json(tasks);
     } catch (error) {
-        res.status(500).json({ error: error instanceof Error ? error.message : 'Error fetching tasks' });
+        res.status(500).json({ message: 'Failed to fetch tasks.', error: error instanceof Error ? error.message : 'An unknown error occurred' });
     }
 };
-
 // Get all tasks for the authenticated user
 export const getUserTasks = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const userId = req.user?.id;
