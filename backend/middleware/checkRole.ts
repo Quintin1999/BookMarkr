@@ -8,7 +8,6 @@ export const checkClubOwner = async (req: AuthenticatedRequest, res: Response, n
     const clubId: string = req.params.clubId;
     const userId: string | undefined = req.user?.id;
 
-    // Ensure the user is authenticated
     if (!userId) {
         res.status(401).json({ message: 'User ID is missing in request. Please log in.' });
         return;
@@ -21,7 +20,6 @@ export const checkClubOwner = async (req: AuthenticatedRequest, res: Response, n
             return;
         }
 
-        // Check if the user is the club owner
         if (club.owner.toString() !== userId) {
             res.status(403).json({ message: 'Access denied. Only the club owner can perform this action.' });
             return;
@@ -29,7 +27,7 @@ export const checkClubOwner = async (req: AuthenticatedRequest, res: Response, n
 
         next();
     } catch (error) {
-        console.error(error);  // Log the error for debugging
+        console.error(error);  
         res.status(500).json({ message: 'Server error while checking club ownership' });
     }
 };

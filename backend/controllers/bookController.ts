@@ -22,7 +22,6 @@ interface GoogleBook {
     };
 }
 
-// Search Google Books API
 export const searchBooks = async (req: Request, res: Response): Promise<void> => {
     const { query } = req.query;
 
@@ -77,13 +76,11 @@ export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response)
         let book = await Book.findOne({ googleId });
 
         if (!book) {
-            // Fetch book details from Google Books API
             const response = await axios.get<{ volumeInfo: GoogleBook['volumeInfo'] }>(
                 `${GOOGLE_BOOKS_API_URL}/${googleId}`
             );
             const bookData = response.data.volumeInfo;
 
-            // Create a new book entry
             book = new Book({
                 googleId,
                 title: bookData.title,
@@ -97,7 +94,6 @@ export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response)
         }
 
         if (targetType === 'user') {
-            // Add the book to the user's library
             await User.findByIdAndUpdate(userObjectId, {
                 $addToSet: { library: book._id },
             });
@@ -115,13 +111,11 @@ export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response)
                 return;
             }
 
-            // Check if the user is the owner of the selected club
             if (String(club.owner) !== userId) {
                 res.status(403).json({ message: 'You are not authorized to add books to this club' });
                 return;
             }
 
-            // Add the book to the club's books array
             await Club.findByIdAndUpdate(clubObjectId, {
                 $addToSet: { library: book._id },
             });

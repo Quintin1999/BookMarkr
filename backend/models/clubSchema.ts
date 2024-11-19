@@ -10,7 +10,7 @@ export interface IClub extends Document {
     roomKey: string;
     createdAt?: Date;
     members: mongoose.Types.ObjectId[];
-    library: mongoose.Types.ObjectId[]; // Array to hold book references
+    library: mongoose.Types.ObjectId[]; 
 }
 
 const ClubSchema: Schema<IClub> = new Schema({
@@ -20,10 +20,9 @@ const ClubSchema: Schema<IClub> = new Schema({
     roomKey: { type: String, required: true, unique: true },
     createdAt: { type: Date, default: Date.now },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    library: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }] // Array to hold book references
+    library: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }] 
 });
 
-// Pre-save hook to generate roomKey if not provided
 ClubSchema.pre<IClub>('save', async function (next) {
     if (!this.roomKey) {
         this.roomKey = Math.random().toString(36).substr(2, 10);

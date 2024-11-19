@@ -24,7 +24,6 @@ const UserSchema: Schema<IUser> = new Schema({
     library: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }], // Personal library of books
 });
 
-// Pre-save hook for password hashing
 UserSchema.pre('save', async function (this: IUser, next) {
     if (!this.isModified('password')) return next();
 
@@ -37,7 +36,6 @@ UserSchema.pre('save', async function (this: IUser, next) {
     }
 });
 
-// Password comparison method
 UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
     return bcrypt.compare(candidatePassword, this.password);
 };

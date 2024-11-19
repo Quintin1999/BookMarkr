@@ -1,15 +1,15 @@
+//backend/middleware/authMiddleware.ts  
+
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-// Extend the Request interface to include the user property
 export interface AuthenticatedRequest extends Request {
-    user?: { id: string }; // User object will include only the user ID
+    user?: { id: string }; 
 }
 
 export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
     const authHeader = req.header('Authorization');
 
-    // Debugging log for Authorization header
     console.log('Authorization Header:', authHeader);
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

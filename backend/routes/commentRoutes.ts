@@ -1,9 +1,9 @@
-import express, { Request, Response } from 'express';  // Import Request and Response types
+import express, { Request, Response } from 'express';  
 const router = express.Router();
 
 // Define routes
 router.post('/', (req: Request, res: Response) => {
-    const { content } = req.body; // Use req.body if needed for POST requests
+    const { content } = req.body; 
     res.send(`Comment added with content: ${content}`);
 });
 

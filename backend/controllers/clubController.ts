@@ -6,10 +6,9 @@ import Club from '../models/clubSchema';
 import User from '../models/userSchema';
 import Book from '../models/bookSchema';
 
-// Create a new club
 export const createClub = async (req: Request, res: Response): Promise<void> => {
     const { name, description, roomKey } = req.body;
-    const userId = (req as AuthenticatedRequest).user?.id; // Ensure authenticated user ID is available
+    const userId = (req as AuthenticatedRequest).user?.id; 
 
     if (!userId) {
         res.status(401).json({ message: 'User not authenticated' });
@@ -17,14 +16,12 @@ export const createClub = async (req: Request, res: Response): Promise<void> => 
     }
 
     try {
-        // Check if the club with the same name already exists
         const existingClub = await Club.findOne({ name });
         if (existingClub) {
             res.status(400).json({ message: 'A club with this name already exists' });
             return;
         }
 
-        // Create a new club with owner as an ObjectId
         const newClub = new Club({
             name,
             description,
@@ -32,14 +29,12 @@ export const createClub = async (req: Request, res: Response): Promise<void> => 
             owner: userId,
         });
 
-        // Save the club in the database
         await newClub.save();
 
-        // Update user's createdClubs array
         await User.findByIdAndUpdate(
             userId,
-            { $addToSet: { createdClubs: newClub._id } }, // Add the club to createdClubs array
-            { new: true } // Return the updated document
+            { $addToSet: { createdClubs: newClub._id } }, 
+            { new: true } 
         );
 
         res.status(201).json({ message: 'Club created successfully', club: newClub });
@@ -48,7 +43,7 @@ export const createClub = async (req: Request, res: Response): Promise<void> => 
         res.status(500).json({ error: error instanceof Error ? error.message : 'Error creating club' });
     }
 };
-// Join an existing club
+
 export const joinClub = async (req: Request, res: Response): Promise<void> => {
     const { userId, clubId, roomKey } = req.body;
 
@@ -59,13 +54,11 @@ export const joinClub = async (req: Request, res: Response): Promise<void> => {
             return;
         }
         
-        // Check if the roomKey matches
         if (club.roomKey !== roomKey) {
             res.status(403).json({ message: 'Invalid room key' });
             return;
         }
 
-        // Prevent the owner from being added to members
         if (club.owner.toString() === userId) {
             res.status(400).json({ message: 'Owner cannot join as a member' });
             return;
@@ -80,7 +73,6 @@ export const joinClub = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-// Leave a club
 export const leaveClub = async (req: Request, res: Response): Promise<void> => {
     const { userId, clubId } = req.body;
 
@@ -92,7 +84,6 @@ export const leaveClub = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Prevent the owner from leaving their own club
         if (club.owner.toString() === userId) {
             res.status(400).json({ message: 'Owner cannot leave their own club' });
             return;
@@ -112,8 +103,8 @@ export const getClubDetails = async (req: Request, res: Response): Promise<void>
 
     try {
         const club = await Club.findById(clubId)
-            .populate('owner', 'name') // Populating owner name
-            .populate('members', 'name'); // Populating members' names
+            .populate('owner', 'name') 
+            .populate('members', 'name'); 
 
         if (!club) {
             res.status(404).json({ message: 'Club not found' });
@@ -137,20 +128,17 @@ export const addBookToClubLibrary = async (req: Request, res: Response): Promise
             return;
         }
 
-        // Check if the book exists in the Book collection
         const book = await Book.findById(bookId);
         if (!book) {
             res.status(404).json({ message: 'Book not found' });
             return;
         }
 
-        // Check if the book already exists in the club's library
         if (club.library.includes(bookId)) {
             res.status(400).json({ message: 'Book already exists in the club library' });
             return;
         }
 
-        // Add the book to the club's books array
         club.library.push(bookId);
         await club.save();
 
@@ -161,7 +149,7 @@ export const addBookToClubLibrary = async (req: Request, res: Response): Promise
 };
 
 interface PopulatedClub {
-    _id: string; // Or mongoose.Types.ObjectId
+    _id: string; 
     name: string;
     description: string;
 }
@@ -216,7 +204,6 @@ export const updateClub = async (req: AuthenticatedRequest, res: Response): Prom
     try {
         const userId = req.user?.id;
 
-        // Ensure the user owns the club
         const club = await Club.findById(clubId);
         if (!club) {
             res.status(404).json({ message: 'Club not found' });
@@ -227,7 +214,6 @@ export const updateClub = async (req: AuthenticatedRequest, res: Response): Prom
             return;
         }
 
-        // Update club details
         const updateData: Partial<{ name: string; description: string; roomKey: string }> = {};
         if (name) updateData.name = name;
         if (description) updateData.description = description;
@@ -247,7 +233,6 @@ export const deleteClub = async (req: AuthenticatedRequest, res: Response): Prom
     try {
         const userId = req.user?.id;
 
-        // Ensure the user owns the club
         const club = await Club.findById(clubId);
         if (!club) {
             res.status(404).json({ message: 'Club not found' });
@@ -258,10 +243,8 @@ export const deleteClub = async (req: AuthenticatedRequest, res: Response): Prom
             return;
         }
 
-        // Delete the club
         await Club.findByIdAndDelete(clubId);
 
-        // Optionally, remove the club from the owner's createdClubs array
         await User.findByIdAndUpdate(userId, { $pull: { createdClubs: clubId } });
 
         res.status(200).json({ message: 'Club deleted successfully' });
@@ -281,7 +264,7 @@ export const getClubLibrary = async (req: AuthenticatedRequest, res: Response): 
             return;
         }
 
-        res.status(200).json(club.library); // TypeScript now recognizes `library`
+        res.status(200).json(club.library); 
     } catch (error) {
         console.error('Error fetching club library:', error);
         res.status(500).json({ message: 'Error fetching club library', error });
@@ -294,7 +277,7 @@ export const deleteBookFromClubLibrary = async (req: AuthenticatedRequest, res: 
     try {
         const club = await Club.findByIdAndUpdate(
             clubId,
-            { $pull: { library: bookId } }, // Update the library field
+            { $pull: { library: bookId } }, 
             { new: true }
         );
 
@@ -303,7 +286,7 @@ export const deleteBookFromClubLibrary = async (req: AuthenticatedRequest, res: 
             return;
         }
 
-        await Book.findByIdAndDelete(bookId); // Optional: delete the book
+        await Book.findByIdAndDelete(bookId); 
 
         res.status(200).json({ message: 'Book deleted from club library successfully' });
     } catch (error) {

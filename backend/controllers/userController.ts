@@ -42,14 +42,12 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Use comparePassword method
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             res.status(400).json({ message: 'Invalid email or password' });
             return;
         }
 
-        // Generate JWT token
         const token = jwt.sign(
             { id: user._id, username: user.username },
             JWT_SECRET,
@@ -66,7 +64,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const updateUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = req.user?.id; // Ensure user exists
+    const userId = req.user?.id; 
     const { username, email, password } = req.body;
 
     try {
@@ -74,7 +72,6 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response): Prom
         if (username) updateData.username = username;
         if (email) updateData.email = email;
 
-        // Hash the new password if provided
         if (password) {
             const salt = await bcrypt.genSalt(10);
             updateData.password = await bcrypt.hash(password, salt);
@@ -133,8 +130,8 @@ export const getUserLibrary = async (req: Request, res: Response): Promise<void>
     }
 };
 export const deleteBookFromUserLibrary = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = req.user?.id; // Get the authenticated user ID
-    const { bookId } = req.params; // Extract the book ID from the URL
+    const userId = req.user?.id;
+    const { bookId } = req.params; 
 
     try {
         const user = await User.findById(userId);
@@ -143,11 +140,9 @@ export const deleteBookFromUserLibrary = async (req: AuthenticatedRequest, res: 
             return;
         }
 
-        // Remove the book from the user's library
         const updatedLibrary = user.library.filter((id) => id.toString() !== bookId);
         user.library = updatedLibrary;
 
-        // Save the updated user document
         await user.save();
 
         res.status(200).json({ message: 'Book removed from library successfully' });

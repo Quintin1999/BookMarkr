@@ -1,7 +1,9 @@
+//backend/server.ts
+
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import connectDB from './db';
-dotenv.config(); // This loads the variables from your .env file into process.env
+dotenv.config(); 
 
 connectDB();
 
@@ -14,7 +16,7 @@ import commentRoutes from './routes/commentRoutes';
 import userRoutes from './routes/userRoutes';
 
 
-const app = express(); // Now works with the default import
+const app = express(); 
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());

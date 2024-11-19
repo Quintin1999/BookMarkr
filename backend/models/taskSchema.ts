@@ -7,7 +7,7 @@ export interface ITask extends Document {
     createdBy: mongoose.Types.ObjectId;
     description: string;
      status: 'pending' | 'completed';
-    comments: mongoose.Types.ObjectId[]; // Referencing comment IDs
+    comments: mongoose.Types.ObjectId[]; 
 }
 
 const TaskSchema: Schema<ITask> = new Schema({
@@ -15,7 +15,7 @@ const TaskSchema: Schema<ITask> = new Schema({
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     description: { type: String, required: true },
     status: { type: String, enum: ['pending', 'completed'], default: 'pending' },
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }], // Reference to Comment model
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }]
 });
 
 const Task = mongoose.model<ITask>('Task', TaskSchema);

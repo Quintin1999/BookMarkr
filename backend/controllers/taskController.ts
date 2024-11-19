@@ -6,8 +6,8 @@ import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
 // Create a new task
 export const addTask = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { bookId, description, status = 'pending' } = req.body; // Default status is 'pending'
-    const userId = req.user?.id; // User from authenticated request
+    const { bookId, description, status = 'pending' } = req.body;
+    const userId = req.user?.id; 
 
     try {
         const task = new Task({
