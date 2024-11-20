@@ -53,27 +53,37 @@ export const getUserTasks = async (req: AuthenticatedRequest, res: Response): Pr
 };
 
 // Update a task
-export const updateTask = async (req: Request, res: Response): Promise<void> => {
+export const updateTask = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { taskId } = req.params;
     const { description, status } = req.body;
 
     try {
-        const updatedTask = await Task.findByIdAndUpdate(
-            taskId,
-            { $set: { description, status } },
-            { new: true, runValidators: true }
-        );
+        const task = await Task.findById(taskId).populate<{ bookId: { owner: string; clubId?: string } }>('bookId');
 
-        if (!updatedTask) {
+        if (!task) {
             res.status(404).json({ message: 'Task not found' });
             return;
         }
 
-        res.status(200).json({ message: 'Task updated successfully', task: updatedTask });
+        const book = task.bookId;
+
+        if (req.user?.id !== book.owner && !book.clubId) {
+            res.status(403).json({ message: 'Unauthorized to update this task' });
+            return;
+        }
+
+        task.description = description || task.description;
+        task.status = status || task.status;
+
+        await task.save();
+        res.status(200).json({ message: 'Task updated successfully', task });
     } catch (error) {
-        res.status(500).json({ error: error instanceof Error ? error.message : 'Error updating task' });
+        console.error('Error updating task:', error);
+        res.status(500).json({ message: 'Error updating task' });
     }
 };
+
+
 
 // Delete a task
 export const deleteTask = async (req: Request, res: Response): Promise<void> => {

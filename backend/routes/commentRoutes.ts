@@ -15,9 +15,9 @@ router.post('/',authenticate, addComment as express.RequestHandler);
 
 router.get('/task/:taskId', getCommentsForBookTasks);
 
-router.put('/:commentId', updateComment);
+router.put('/:commentId', authenticate, updateComment);
 
-router.delete('/:commentId', deleteComment);
+router.delete('/:commentId',authenticate, deleteComment);
 
 router.patch('/:commentId/like', likeComment);
 
