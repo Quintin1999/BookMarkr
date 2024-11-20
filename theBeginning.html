@@ -1,14 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <title>BookMarkr</title>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
     <h1>API Testing Form</h1>
 
     <!-- Create User -->
@@ -144,6 +141,8 @@
       <button type="button" id="createTaskPersonalButton">Create Task</button>
     </form>
 
+
+
     <!-- Select Club and Book to craete a task for club-->
     <h2>Create Task for Club Library Book</h2>
     <div id="clubContainer">
@@ -195,6 +194,9 @@
       <button type="button" id="addCommentButton">Add Comment</button>
     </form>
 
+
+
+    
     <script>
       const apiUrl = "http://localhost:3000/api";
       // token management
@@ -505,7 +507,7 @@
           const existingDropdown = document.getElementById(
             "clubSelectForDelete"
           );
-          if (existingDropdown) existingDropdown.remove(); 
+          if (existingDropdown) existingDropdown.remove(); // Remove any previous dropdown
 
           const dropdown = document.createElement("select");
           dropdown.id = "clubSelectForDelete";
@@ -531,7 +533,7 @@
             ) {
               deleteSelectedClub(selectedClubId);
             }
-            dropdown.remove(); 
+            dropdown.remove(); // Remove dropdown after selection
             confirmButton.remove();
           });
 
@@ -667,7 +669,7 @@
           });
 
           const result = await response.json();
-          console.log("API Response for personal library:", result); 
+          console.log("API Response for personal library:", result); // Debugging
 
           if (response.ok) {
             alert("Book added to personal library successfully!");
@@ -692,7 +694,7 @@
           return null;
         }
 
-        console.log("Fetching clubs for user"); 
+        console.log("Fetching clubs for user"); // Debugging
         try {
           const response = await fetch(
             "http://localhost:3000/api/club/my-clubs",
@@ -712,7 +714,7 @@
           }
 
           const clubs = await response.json();
-          console.log("Fetched clubs:", clubs); 
+          console.log("Fetched clubs:", clubs); // Debugging
 
           if (!clubs.length) {
             alert("No clubs available to select.");
@@ -729,7 +731,7 @@
             const existingDropdown = document.getElementById(
               "clubDropdownContainer"
             );
-            if (existingDropdown) existingDropdown.remove(); 
+            if (existingDropdown) existingDropdown.remove(); // Avoid duplicates
 
             const dropdownContainer = document.createElement("div");
             dropdownContainer.id = "clubDropdownContainer";
@@ -748,16 +750,16 @@
             confirmButton.textContent = "Confirm";
             confirmButton.addEventListener("click", () => {
               const selectedClubId = dropdown.value;
-              console.log("Confirmed club selection:", selectedClubId); 
-              dropdownContainer.remove(); 
-              resolve(selectedClubId); 
+              console.log("Confirmed club selection:", selectedClubId); // Debugging
+              dropdownContainer.remove(); // Clean up
+              resolve(selectedClubId); // Resolve with selected club ID
             });
 
             dropdownContainer.appendChild(dropdown);
             dropdownContainer.appendChild(confirmButton);
 
-            document.body.appendChild(dropdownContainer); 
-            console.log("Dropdown and Confirm Button added to DOM"); 
+            document.body.appendChild(dropdownContainer); // Attach to DOM
+            console.log("Dropdown and Confirm Button added to DOM"); // Debugging
           });
         } catch (error) {
           console.error("Error fetching clubs:", error);
@@ -782,7 +784,7 @@
         }
 
         const payload = { googleId: bookId, targetType: "club", clubId };
-        console.log("Payload being sent:", payload); 
+        console.log("Payload being sent:", payload); // Debugging
 
         try {
           const response = await fetch("http://localhost:3000/api/books/add", {
@@ -795,7 +797,7 @@
           });
 
           const result = await response.json();
-          console.log("Response from API:", result); 
+          console.log("Response from API:", result); // Debugging
 
           if (response.ok) {
             alert("Book added to club library successfully!");
@@ -824,9 +826,9 @@
           if (!response.ok) throw new Error("Failed to fetch personal library");
 
           const library = await response.json();
-          console.log("Personal Library Response:", library); 
+          console.log("Personal Library Response:", library); // Check structure
 
-          displayPersonalLibraryBooks(library); 
+          displayPersonalLibraryBooks(library); // Pass valid data structure
         } catch (error) {
           console.error("Error fetching personal library:", error);
         }
@@ -1016,7 +1018,7 @@
           const deleteContainer = document.getElementById(
             "deleteClubBookContainer"
           );
-          deleteContainer.innerHTML = ""; 
+          deleteContainer.innerHTML = ""; // Clear previous content
 
           if (books.length === 0) {
             deleteContainer.innerHTML = "<p>No books available to delete.</p>";
@@ -1064,7 +1066,7 @@
 
           if (response.ok) {
             alert("Book deleted from club library successfully!");
-            fetchBooksInClub(clubId); 
+            fetchBooksInClub(clubId); // Refresh book dropdown
           } else {
             alert("Error deleting book: " + result.message);
           }
@@ -1076,12 +1078,12 @@
       // Display personal library books in a dropdown
       function displayPersonalLibraryBooks(books) {
         const dropdown = document.getElementById("personalBookSelect");
-        dropdown.innerHTML = ""; 
+        dropdown.innerHTML = ""; // Clear previous entries
 
         books.forEach((book) => {
           const option = document.createElement("option");
-          option.value = book._id; 
-          option.textContent = book.title || "Untitled"; 
+          option.value = book._id; // Ensure `book._id` matches API structure
+          option.textContent = book.title || "Untitled"; // Use title or fallback
           dropdown.appendChild(option);
         });
 
@@ -1115,7 +1117,7 @@
 
           if (response.ok) {
             alert("Task created successfully!");
-            document.getElementById("personalTaskDescription").value = ""; 
+            document.getElementById("personalTaskDescription").value = ""; // Clear the form
           } else {
             console.error("Error creating task:", result.message);
             alert(`Error: ${result.message}`);
@@ -1141,7 +1143,7 @@
           if (!response.ok) throw new Error("Failed to fetch clubs");
 
           const clubs = await response.json();
-          console.log("Fetched Clubs:", clubs); 
+          console.log("Fetched Clubs:", clubs); // Debugging
           if (!Array.isArray(clubs) || clubs.length === 0) {
             alert("No clubs found.");
             return;
@@ -1157,7 +1159,7 @@
       // Display clubs in a dropdown and fetch their books
       function displayClubs(clubs) {
         const container = document.getElementById("clubContainer");
-        container.innerHTML = ""; 
+        container.innerHTML = ""; // Clear existing content
 
         const dropdown = document.createElement("select");
         dropdown.id = "clubSelect";
@@ -1180,7 +1182,7 @@
       // Fetch books for the selected club
       async function fetchBooksForSelectedClub() {
         const clubId = document.getElementById("clubSelect").value;
-        console.log("Selected Club ID:", clubId); 
+        console.log("Selected Club ID:", clubId); // Debugging
 
         if (!clubId) {
           alert("No club selected.");
@@ -1198,7 +1200,7 @@
           );
 
           const books = await response.json();
-          console.log("API Response for Club Books:", books);
+          console.log("API Response for Club Books:", books); // Debugging
 
           if (!response.ok) {
             throw new Error(
@@ -1220,7 +1222,7 @@
       // Display club books in a dropdown
       function displayClubBooks(books) {
         const form = document.getElementById("createTaskClubForm");
-        form.innerHTML = ""; 
+        form.innerHTML = ""; // Clear previous content
 
         if (books.length === 0) {
           form.innerHTML = "<p>No books available in this club library.</p>";
@@ -1232,8 +1234,8 @@
 
         books.forEach((book) => {
           const option = document.createElement("option");
-          option.value = book._id; 
-          option.textContent = book.title || "Untitled"; 
+          option.value = book._id; // Ensure `book._id` matches API structure
+          option.textContent = book.title || "Untitled"; // Use title or fallback
           dropdown.appendChild(option);
         });
 
@@ -1249,7 +1251,7 @@
         const submitButton = document.createElement("button");
         submitButton.textContent = "Create Task";
         submitButton.id = "createTaskClubButton";
-        submitButton.type = "button"; 
+        submitButton.type = "button"; // Prevent form submission
 
         submitButton.addEventListener("click", createTaskForClubBook);
 
@@ -1287,7 +1289,7 @@
 
           if (response.ok) {
             alert("Task created successfully!");
-            document.getElementById("clubTaskDescription").value = ""; 
+            document.getElementById("clubTaskDescription").value = ""; // Clear the form
           } else {
             console.error("Error creating task:", result.message);
             alert(`Error: ${result.message}`);
@@ -1326,10 +1328,10 @@
 
           if (response.ok) {
             alert("Comment added successfully!");
-            document.getElementById("commentContent").value = ""; 
+            document.getElementById("commentContent").value = ""; // Clear the input
           } else {
             const error = await response.json();
-            console.error("Backend error response:", error); 
+            console.error("Backend error response:", error); // Debugging backend error
             alert(`Error: ${error.message}`);
           }
         } catch (error) {
@@ -1344,23 +1346,24 @@
             ? `${apiUrl}/club/${clubId}/library`
             : `${apiUrl}/users/library`;
 
-        console.log("Fetching from endpoint:", endpoint); 
+        console.log("Fetching from endpoint:", endpoint); // Debugging
 
         const response = await fetch(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!response.ok) {
-          const errorText = await response.text(); 
-          console.error("Error response from API:", errorText); 
+          const errorText = await response.text(); // Capture error response
+          console.error("Error response from API:", errorText); // Debugging
           throw new Error(`Failed to fetch library: ${errorText}`);
         }
 
         const data = await response.json();
-        console.log("Fetched library data:", data); 
+        console.log("Fetched library data:", data); // Debugging
+        return data;
       }
 
-      // Fetch Clubs for comments
+      // Fetch Clubs
       async function fetchClubsForComments() {
         const token = getAuthToken();
         try {
@@ -1369,7 +1372,7 @@
           });
 
           if (!response.ok) {
-            const errorText = await response.text(); 
+            const errorText = await response.text(); // Debugging
             console.error(
               "Error response from API (comments fetch):",
               errorText
@@ -1378,7 +1381,7 @@
           }
 
           const clubs = await response.json();
-          console.log("Fetched clubs for comments:", clubs); 
+          console.log("Fetched clubs for comments:", clubs); // Debugging
           return clubs;
         } catch (error) {
           console.error("Error fetching clubs for comments:", error);
@@ -1396,13 +1399,13 @@
           });
 
           if (!response.ok) {
-            const errorText = await response.text(); 
+            const errorText = await response.text(); // Debugging
             console.error("Error response from API (tasks fetch):", errorText);
             throw new Error("Failed to fetch tasks for the selected book.");
           }
 
           const tasks = await response.json();
-          console.log("Fetched tasks for book:", tasks); 
+          console.log("Fetched tasks for book:", tasks); // Debugging
           return tasks;
         } catch (error) {
           console.error("Error in fetchTasksForBook:", error);
@@ -1417,7 +1420,7 @@
           return;
         }
 
-        dropdown.innerHTML = ""; 
+        dropdown.innerHTML = ""; // Clear existing options
 
         if (!items || items.length === 0) {
           console.warn(`No items available for dropdown "${dropdownId}".`);
@@ -1441,13 +1444,14 @@
       document
         .getElementById("libraryTypeForm")
         .addEventListener("change", async (event) => {
-          const libraryType = event.target.value; 
+          const libraryType = event.target.value; // personal or club
           const clubContainer = document.getElementById(
             "clubSelectionContainer"
           );
           const bookDropdown = document.getElementById("bookSelect");
           const taskDropdown = document.getElementById("taskSelect");
 
+          // Clear dropdowns
           populateDropdown("bookSelect", [], "title", "_id");
           populateDropdown("taskSelect", [], "description", "_id");
 
@@ -1455,7 +1459,7 @@
             clubContainer.style.display = "block";
 
             try {
-              const clubs = await fetchClubsForComments(); 
+              const clubs = await fetchClubsForComments(); // Use new function
               populateDropdown("clubSelect", clubs, "name", "_id");
             } catch (error) {
               console.error("Error fetching clubs for comments:", error);
@@ -1489,9 +1493,9 @@
           );
 
           try {
-            populateDropdown("bookSelect", [], "title", "_id"); 
+            populateDropdown("bookSelect", [], "title", "_id"); // Clear existing
             const books = await fetchLibraries("club", clubId);
-            console.log("Books fetched for club:", books); 
+            console.log("Books fetched for club:", books); // Debugging
             populateDropdown("bookSelect", books, "title", "_id");
           } catch (error) {
             console.error(
@@ -1515,9 +1519,9 @@
           console.log("Fetching tasks for selected book ID:", bookId);
 
           try {
-            populateDropdown("taskSelect", [], "description", "_id"); 
+            populateDropdown("taskSelect", [], "description", "_id"); // Clear existing tasks
             const tasks = await fetchTasksForBook(bookId);
-            console.log("Tasks fetched for book:", tasks); 
+            console.log("Tasks fetched for book:", tasks); // Debug fetched tasks
             populateDropdown("taskSelect", tasks, "description", "_id");
           } catch (error) {
             console.error("Error fetching tasks for the selected book:", error);
@@ -1554,7 +1558,7 @@
 
             if (response.ok) {
               alert("Comment added successfully!");
-              document.getElementById("commentContent").value = ""; 
+              document.getElementById("commentContent").value = ""; // Clear input
             } else {
               const error = await response.json();
               console.error("Backend error:", error);

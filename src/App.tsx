@@ -1,9 +1,15 @@
 import './App.css'
 
+import LoginButton from './components/LoginButton.tsx'
+
 function App() {
   return (
-   <div>ksjdhfkjshdf</div>
+    <div>
+   <LoginButton/>
+   </div>
+   
   )
 }
 
 export default App
+//this shows everything, renders all
