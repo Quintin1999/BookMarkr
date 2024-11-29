@@ -1,16 +1,37 @@
-import './App.css'
-import './styles/styles.css';
+import React from 'react';
+import { BrowserRouter,Routes, Route } from 'react-router-dom';
+import LoginPage from './login/LoginPage.tsx';
+import SignupPage from './signup/SignupPage.tsx';
+import './styles/styles.css'; 
 
-import LoginButton from './components/LoginButton.tsx'
+const App: React.FC = () => {
 
-function App() {
   return (
-    <div>
-   <LoginButton/>
-   </div>
-   
-  )
-}
 
-export default App
-//this shows everything, renders all
+      <Routes>
+        {/* route for login page */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* route for signup page */}
+        <Route path="/signup" element={<SignupPage />} />
+
+        {/* default page*/}
+        <Route
+          path="/"
+          element={
+            <div>
+              <h1>404 - Page Not Found</h1>
+              <p>
+                Go to <a href="/login">Login</a> or <a href="/signup">Signup</a>
+              </p>
+            </div>
+          }
+        />
+      </Routes>
+
+  );
+  
+};
+
+
+export default App;
