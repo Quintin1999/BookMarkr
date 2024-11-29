@@ -3,19 +3,23 @@ import { Routes, Route } from 'react-router-dom';
 import LoginPage from './login/LoginPage.tsx';
 import SignupPage from './signup/SignupPage.tsx';
 import './styles/styles.css';
-import Navbar from './components/Navbar.tsx';
+import FreshNavbar from './components/FreshNavbar.tsx';
 import Footer from './components/Footer.tsx'
+import HomePage from './home/HomePage.tsx';
 
 const App: React.FC = () => {
   return (
     <>
-      <Navbar />
+      <FreshNavbar />
       <Routes>
         {/* route for login page */}
         <Route path="/login" element={<LoginPage />} />
 
         {/* route for signup page */}
         <Route path="/signup" element={<SignupPage />} />
+
+        {/*route for home page, left here to keep debugging, remove at later date */}
+        <Route path="/home" element={<HomePage/>} />
 
         {/* default page*/}
         <Route

@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "./Navbar";
+import FreshNavbar from "./FreshNavbar";
 import Footer from "./Footer";
 import '../styles/styles.css';
 
@@ -7,7 +7,7 @@ import '../styles/styles.css';
 const Layout: React.FC<{children: React.ReactNode }> = ({children})=>{
     return(
         <div className="layout">
-            <Navbar/>
+            <FreshNavbar/>
             <main className="content">{children}</main>
             <Footer/>
         </div>
