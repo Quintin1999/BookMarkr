@@ -1,10 +1,9 @@
 import React from 'react';
-import Layout from '../components/Layout';
-import './styles.css';
+
 
 const SignupPage: React.FC = () => {
   return (
-    <Layout>
+
       <div className="form-container">
         <h1>Sign Up</h1>
         <form action="/api/signup" method="POST" className="form">
@@ -38,7 +37,7 @@ const SignupPage: React.FC = () => {
           Already have an account? <a href="/login">Login.</a>
         </p>
       </div>
-    </Layout>
+
   );
 };
 
