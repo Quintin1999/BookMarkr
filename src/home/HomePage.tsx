@@ -1,5 +1,5 @@
 import React from 'react';
-
+import BookCard from '../components/BookCard';
 
 const HomePage: React.FC = () => {
   return (
@@ -15,6 +15,15 @@ const HomePage: React.FC = () => {
             <img src="../public/images/Book_Vector.png" alt="Bookmarkr Logo"/>
         </div>
       </section>
+
+    {/* Book Grid Section, replace with api calls*/}
+        <section className="book-row">
+            <BookCard title="Book Title 1" author="Author 1" year={2024} onAdd={() => alert('Added Book 1')} />
+            <BookCard title="Book Title 2" author="Author 2" year={2023} onAdd={() => alert('Added Book 2')} />
+            <BookCard title="Book Title 3" author="Author 3" year={2025} onAdd={() => alert('Added Book 3')} />
+            <BookCard title="Book Title 4" author="Author 4" year={2022} onAdd={() => alert('Added Book 4')} />
+      </section>
+
       <section className="library">
         <div className='library-content'>
         <h2>Manage Your Library</h2>

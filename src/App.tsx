@@ -6,6 +6,7 @@ import './styles/styles.css';
 import FreshNavbar from './components/FreshNavbar.tsx';
 import Footer from './components/Footer.tsx'
 import HomePage from './home/HomePage.tsx';
+import PersonalBook from './persbook/PersonalBook.tsx';
 
 const App: React.FC = () => {
   return (
@@ -20,6 +21,9 @@ const App: React.FC = () => {
 
         {/*route for home page, left here to keep debugging, remove at later date */}
         <Route path="/home" element={<HomePage/>} />
+
+        {/*route for personal book page*/}
+        <Route path="/book" element={<PersonalBook/>}/>
 
         {/* default page*/}
         <Route
