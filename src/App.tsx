@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import LoginPage from './login/LoginPage.tsx';
 import SignupPage from './signup/SignupPage.tsx';
 import './styles/styles.css';
-import FreshNavbar from './components/FreshNavbar.tsx';
+import Navbar from './components/Navbar.tsx';
 import Footer from './components/Footer.tsx'
 import HomePage from './home/HomePage.tsx';
 import PersonalBook from './persbook/PersonalBook.tsx';
@@ -11,7 +11,7 @@ import PersonalBook from './persbook/PersonalBook.tsx';
 const App: React.FC = () => {
   return (
     <>
-      <FreshNavbar />
+      <Navbar />
       <Routes>
         {/* route for login page */}
         <Route path="/login" element={<LoginPage />} />
