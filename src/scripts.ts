@@ -51,3 +51,46 @@ export async function submitLoginForm(event: FormEvent<HTMLFormElement>): Promis
     alert("Error during login");
   }
 }
+
+//function to handle signup form submission
+export async function submitSignupForm(event: FormEvent<HTMLFormElement>): Promise<void> {
+  event.preventDefault(); // Prevent the default form submission
+
+  // Get input elements and their values
+  const usernameInput = document.getElementById("username") as HTMLInputElement;
+  const emailInput = document.getElementById("email") as HTMLInputElement;
+  const passwordInput = document.getElementById("password") as HTMLInputElement;
+
+  // Ensure inputs are valid before proceeding
+  if (!usernameInput || !emailInput || !passwordInput) {
+    console.error("Form inputs not found");
+    alert("Please fill out all required fields.");
+    return;
+  }
+
+  const username: string = usernameInput.value;
+  const email: string = emailInput.value;
+  const password: string = passwordInput.value;
+
+  try {
+    // Send a POST request to create the user
+    const response = await fetch(`${apiUrl}/users/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password }),
+    });
+
+    const result: { success?: boolean; message?: string } = await response.json();
+
+    if (response.ok) {
+      alert("User created successfully!");
+      console.log("Signup successful:", result);
+    } else {
+      alert("Signup failed: " + (result.message || "Unknown error"));
+      console.error("Signup failed:", result);
+    }
+  } catch (error) {
+    console.error("Error during signup:", error);
+    alert("Error during signup");
+  }
+}
