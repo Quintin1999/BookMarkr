@@ -1,5 +1,34 @@
-import React from "react";
+import React,{useState} from "react";
+import { submitLoginForm,selectClub,searchBooks,addBookToPersonalLibrary } from "../scripts";
+import BookCard from "../components/BookCard";
+
+
+interface Book {
+  id: string;
+  title: string;
+  authors?: string[];
+  publishedDate?: string;
+  thumbnail?: string;
+}
+
 const Debug: React.FC = () => {
+
+  const [bookId, setBookId] = useState<string>(""); // State for the book ID input
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleAddBook = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setMessage(null); // Clear previous messages
+
+    try {
+      await addBookToPersonalLibrary(bookId); // Add book using the script
+      setMessage("Book successfully added to your library!");
+    } catch (error) {
+      console.error("Error adding book to library:", error);
+      setMessage("Failed to add book. Please try again.");
+    }
+  };
+
     return(
         <div>
 <div id="root"></div>
@@ -22,20 +51,18 @@ const Debug: React.FC = () => {
 </form>
 
 
+{/* Login Form */}
 <h2>Login</h2>
-<form id="loginForm">
-  <label htmlFor="loginEmail">Email:</label>
-  <input type="email" id="loginEmail" name="email" required /><br />
+      <form onSubmit={submitLoginForm}>
+        <label htmlFor="loginEmail">Email:</label>
+        <input type="email" id="loginEmail" name="email" required />
+        <br />
 
-  <label htmlFor="loginPassword">Password:</label>
-  <input
-    type="password"
-    id="loginPassword"
-    name="password"
-    required
-  /><br />
-  <button type="submit">Login</button>
-</form>
+        <label htmlFor="loginPassword">Password:</label>
+        <input type="password" id="loginPassword" name="password" required />
+        <br />
+        <button type="submit">Login</button>
+      </form>
 
 
 <h2>Update Account</h2>
@@ -99,14 +126,15 @@ const Debug: React.FC = () => {
   </button>
 </div>
 
-
+{/*LEXI IF YOU WANT TO CHANGE HOW BOOKS ARE OUTPUT WHEN SEARCHED, LOOK HERE*/}
 <h2>Search Google Books</h2>
-<form id="searchBooksForm">
-  <label htmlFor="query">Search:</label>
-  <input type="text" name="query" id="query" required />
-  <button type="button" id="searchBooksButton">Search</button>
-</form>
-<div id="searchResults"></div>
+  <form onSubmit={searchBooks}>
+        <label htmlFor="query">Search:</label>
+        <input type="text" id="query" placeholder="Enter book title or author" required />
+
+        <button type="submit">Search</button>
+      </form>
+      <div id="searchResults"></div>
 
 
 <h2>Delete Book from Personal Library</h2>
@@ -162,10 +190,35 @@ const Debug: React.FC = () => {
 </form>
 
 
-<div id="clubSelectionContainer">
-  <label htmlFor="clubSelect">Select Club:</label>
-  <select id="clubSelect"></select>
-</div>
+{/* Select Club */}
+<h2>Select Club</h2>
+      <button
+        onClick={async () => {
+          const clubId = await selectClub();
+          if (clubId) {
+            alert(`Selected Club ID: ${clubId}`);
+          } else {
+            alert("No club selected.");
+          }
+        }}
+      >
+        Select Club
+      </button>
+
+{/* Add Book to Personal Library */}
+<h2>Add Book to Personal Library</h2>
+      <form onSubmit={handleAddBook}>
+        <label htmlFor="bookId">Book ID:</label>
+        <input
+          type="text"
+          id="bookId"
+          placeholder="Enter Book ID"
+          value={bookId}
+          onChange={(e) => setBookId(e.target.value)} // Update the book ID state
+          required
+        />
+        <button type="submit">Add Book</button>
+      </form>
 
 
 <h2>Select Book</h2>

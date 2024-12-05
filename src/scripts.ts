@@ -103,10 +103,13 @@ interface GoogleBooksResponse {
       title: string;
       authors?: string[];
       description?: string;
-      thumbnail?: string;
+      imageLinks?: {
+        thumbnail?: string; // This is where the thumbnail exists
+      };
     };
   }[];
 }
+
 // Function to search Google Books and handle UI updates
 export async function searchBooks(event: React.FormEvent<HTMLFormElement>): Promise<void> {
   event.preventDefault(); // Prevent the default form submission
@@ -140,6 +143,7 @@ export async function searchBooks(event: React.FormEvent<HTMLFormElement>): Prom
 
     if (data.items && data.items.length > 0) {
       // Display each book in the results
+      //LEXI IF YOU WANT TO CHANGE HOW THE BOOKS ARE OUTPUT WHEN SEARCHED, PLEASE LOOK HERE
       data.items.forEach((book) => {
         const bookDiv = document.createElement("div");
 
@@ -166,13 +170,17 @@ export async function searchBooks(event: React.FormEvent<HTMLFormElement>): Prom
             console.error("Error adding book to club library:", error);
           }
         });
-
+        
         // Display book information
+        const thumbnail = book.volumeInfo.imageLinks?.thumbnail || "/public/images/nobook.png";
+
         bookDiv.innerHTML = `
+          <img src="${thumbnail}" alt="Book cover" />
           <p><strong>${book.volumeInfo.title}</strong> by ${
           book.volumeInfo.authors?.join(", ") || "Unknown"
         }</p>
         `;
+
         bookDiv.appendChild(addToUserButton);
         bookDiv.appendChild(addToClubButton);
 
