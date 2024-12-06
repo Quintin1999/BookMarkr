@@ -3,15 +3,17 @@ import { Routes, Route } from 'react-router-dom';
 import LoginPage from './login/LoginPage.tsx';
 import SignupPage from './signup/SignupPage.tsx';
 import './styles/styles.css';
-import FreshNavbar from './components/FreshNavbar.tsx';
+import Navbar from './components/Navbar.tsx';
 import Footer from './components/Footer.tsx'
 import HomePage from './home/HomePage.tsx';
 import PersonalBook from './persbook/PersonalBook.tsx';
+import PersonalLibraryPage from './perslib/PersonalLibrary.tsx';
+import Debug from './debug/debug.tsx';
 
 const App: React.FC = () => {
   return (
     <>
-      <FreshNavbar />
+      <Navbar />
       <Routes>
         {/* route for login page */}
         <Route path="/login" element={<LoginPage />} />
@@ -24,6 +26,14 @@ const App: React.FC = () => {
 
         {/*route for personal book page*/}
         <Route path="/book" element={<PersonalBook/>}/>
+
+        {/*route for personal library page*/}
+        <Route path="/plib" element={<PersonalLibraryPage/>}/>
+
+        {/*route for debug page*/}
+        <Route path="/debug" element={<Debug/>}/>
+
+
 
         {/* default page*/}
         <Route

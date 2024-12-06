@@ -1,14 +1,10 @@
 import React from 'react';
-import LoggedNavbar from '../components/LoggedNavbar';
 import Footer from '../components/Footer';
-import './PersonalBookPage.css';
+
 
 const PersonalBook: React.FC = () => {
   return (
     <div className="personal-book-page">
-      {/* Navbar */}
-      <LoggedNavbar username="Username" />
-
       {/* Main Content */}
       <main className="content">
         {/* Left Column */}
