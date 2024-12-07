@@ -22,6 +22,10 @@
   font-size: 1.25rem;
 }
 
+.navbar a:hover {
+  color: var(--secondary);
+}
+
 .navbar .navLinks {
   display: flex;
   align-items: center;

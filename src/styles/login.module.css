@@ -54,6 +54,12 @@
   border: unset;
   font-size: 1.125rem;
   color: var(--primary-50);
+  margin-top: 0.5rem;
+}
+
+.loginForm button:hover,
+.loginForm button:focus {
+  background-color: var(--primary-900);
 }
 
 .loginForm {

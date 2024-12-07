@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
         {/* Logo Section */}
         <Link to="/home" className={`${styles.navLogo}`}>
           <img
-            src="/images/Bookmarkr_Logo.png"
+            src="/images/Bookmarkr-Logo.svg"
             alt="Bookmarkr Logo"
             className="navbar-logo-image"
           />
@@ -43,7 +43,7 @@ const Navbar: React.FC = () => {
                 Login
               </Link>
               <Link to="/signup" className="navbar-link navbar-signup-button">
-                Signup
+                Sign Up
               </Link>
             </>
           )}
