@@ -1,0 +1,75 @@
+.formPage {
+  position: relative;
+}
+
+.formContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  padding-block: 2rem;
+  height: calc(100vh - 66px - 48px);
+}
+
+.formContainer::before {
+  content: "";
+  position: absolute;
+  width: 60%;
+  height: 100%;
+  background-color: var(--primary-600);
+  z-index: -1;
+  left: 0;
+  top: 0;
+  border-radius: 0px 1000px 0px 0px;
+}
+
+.formContainer::after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  background-color: var(--primary-200);
+  z-index: -1;
+  right: 0;
+  top: 0;
+  border-radius: 1000px 0px 0px 0px;
+}
+
+.loginForm label input {
+  width: calc(100% - 0.5rem);
+  padding: 0.5rem 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.loginForm label {
+  font-size: 1.125rem;
+  color: var(--primary-950);
+}
+
+.loginForm button {
+  max-width: max-content;
+  min-width: min-content;
+  padding: 8px 24px;
+  background-color: var(--primary-800);
+  border: unset;
+  font-size: 1.125rem;
+  color: var(--primary-50);
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 450px;
+}
+
+.loginForm h1 {
+  margin-bottom: 4px;
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+.bookImage {
+  justify-self: center;
+}

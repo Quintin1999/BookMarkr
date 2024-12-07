@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import BookGrid from "../components/BookGrid";
+import BookGrid from "../components/bookGrid/BookGrid";
 
 interface Book {
   _id: string;
@@ -20,12 +20,15 @@ const PersonalLibraryPage: React.FC = () => {
       }
 
       try {
-        const response = await fetch("http://localhost:3000/api/users/library", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`, // Send the token in the Authorization header
-          },
-        });
+        const response = await fetch(
+          "http://localhost:3000/api/users/library",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`, // Send the token in the Authorization header
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch personal library");
