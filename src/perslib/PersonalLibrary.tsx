@@ -43,7 +43,7 @@ const PersonalLibraryPage: React.FC = () => {
 
   const handleAddBook = (bookId: string) => {
     console.log(`Add book clicked with ID: ${bookId}`);
-    // Handle add logic (optional for personal library)
+    // Optional: Add logic for handling book actions (e.g., moving it to another list)
   };
 
   return (
