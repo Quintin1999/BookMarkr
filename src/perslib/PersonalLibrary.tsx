@@ -6,7 +6,10 @@ interface Book {
   title: string;
   author: string;
   year: number;
+  thumbnail: string; // Include thumbnail in the Book interface
 }
+
+
 
 const PersonalLibraryPage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -52,7 +55,11 @@ const PersonalLibraryPage: React.FC = () => {
   return (
     <div>
       <h1>My Personal Library</h1>
-      <BookGrid books={books} onAdd={handleAddBook} />
+      {books.length > 0 ? (
+        <BookGrid books={books} onAdd={handleAddBook} />
+      ) : (
+        <p>You should add books!</p>
+      )}
     </div>
   );
 };

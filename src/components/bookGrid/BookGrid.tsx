@@ -2,15 +2,16 @@ import React from "react";
 import BookCard from "../bookCard/BookCard";
 
 interface Book {
-  _id: string; // MongoDB ID or unique identifier
+  _id: string;
   title: string;
   author: string;
   year: number;
+  thumbnail: string; // Include the thumbnail field
 }
 
 interface BookGridProps {
-  books: Book[]; // Array of book data to render
-  onAdd: (bookId: string) => void; // Callback when "+" button is clicked
+  books: Book[];
+  onAdd: (bookId: string) => void;
 }
 
 const BookGrid: React.FC<BookGridProps> = ({ books, onAdd }) => {
@@ -18,10 +19,11 @@ const BookGrid: React.FC<BookGridProps> = ({ books, onAdd }) => {
     <div className="book-grid">
       {books.map((book) => (
         <BookCard
-          key={book._id} // Use the unique identifier for the React key
+          key={book._id}
           title={book.title}
           author={book.author}
           year={book.year}
+          thumbnail={book.thumbnail} // Pass the thumbnail to BookCard
           onAdd={() => onAdd(book._id)} // Pass book ID to the callback
         />
       ))}
