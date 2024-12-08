@@ -60,31 +60,32 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      <section className="library container">
-        <div className="library-content">
+      <section className={`container`}>
+        <div className={`${styles.featureSection}`}>
           <h2>Manage Your Library</h2>
           <p>
             Not big on group chats? No problem. Start your own collection, track
             your reading journey, and jot down your thoughts at your own pace.
           </p>
-        </div>
-        <div className="library-img">
+
           <img src="../public/images/videoplaceholder.png" alt="Video" />
+
+          <button className="section-button">Begin Your Library</button>
         </div>
-        <button className="section-button">Begin Your Library</button>
       </section>
-      <section className="clubs container">
-        <div className="book-club-content">
+
+      <section className={`container`}>
+        <div className={`${styles.featureSection}`}>
           <h2>Join a Book Club and Share Your Thoughts with Others</h2>
           <p>
             Big on people? join them to make your own collection together, read
             together and engage in discussion.
           </p>
-        </div>
-        <div className="book-club-img">
+
           <img src="../public/images/videoplaceholder.png" alt="Video" />
+
+          <button className="section-button">Join a Book Club!</button>
         </div>
-        <button className="section-button">Join a Book Club!</button>
       </section>
     </div>
   );

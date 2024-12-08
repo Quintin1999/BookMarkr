@@ -48,3 +48,34 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 3rem;
 }
+
+.featureSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  margin-bottom: 4rem;
+
+  h2,
+  p,
+  img {
+    width: 100%;
+  }
+
+  h2,
+  p {
+    max-width: 70ch;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
+
+  img {
+    height: 65vh;
+  }
+
+  button {
+    align-self: center;
+  }
+}
