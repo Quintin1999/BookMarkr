@@ -1,24 +1,64 @@
-import React from "react";
-import Footer from "../components/footer/Footer";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
+interface Book {
+  _id: string;
+  title: string;
+  author: string;
+  year: number;
+  description: string;
+  thumbnail?: string;
+  dateAdded: string;
+}
 
 const PersonalBook: React.FC = () => {
+  const { id } = useParams<{ id: string }>(); // Get the book ID from the URL
+  console.log("Book ID from url:",id);
+  const [book, setBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/books/${id}`);
+        console.log("Book ID being sent to backend:", id);
+        if (!response.ok) {
+          throw new Error("Failed to fetch book details");
+        }
+        const data = await response.json();
+        setBook(data); // Update the state with the fetched book
+      } catch (error) {
+        console.error("Error fetching book details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBook();
+  }, [id]);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!book) {
+    return <p>Book not found.</p>;
+  }
+
   return (
     <div className="personal-book-page">
-      {/* Main Content */}
       <main className="content">
         {/* Left Column */}
         <section className="left-column">
-          <div className="book-cover"></div>
-          <h2>Title of the Book</h2>
-          <p>Author Name</p>
-          <p>Publication Year: 2024</p>
-          <button className="status-button">To Be Read</button>
+          <div className="book-cover">
+            {book.thumbnail && <img src={book.thumbnail} alt={book.title} />}
+          </div>
+          <h2>{book.title}</h2>
+          <p>{book.author}</p>
+          <p>Publication Year: {book.year}</p>
           <div className="metadata">
             <p>
-              <strong>Date Added:</strong> January 12, 2023
-            </p>
-            <p>
-              <strong>Date Completed:</strong> January 12, 2024
+              <strong>Date Added:</strong> {book.dateAdded}
             </p>
           </div>
         </section>
@@ -26,61 +66,9 @@ const PersonalBook: React.FC = () => {
         {/* Right Column */}
         <section className="right-column">
           {/* Description */}
-          <p className="book-description">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
-          </p>
-          <div className="book-stats">
-            <p>
-              <strong>249 Pages</strong>
-            </p>
-            <p>
-              <strong>23 Chapters</strong>
-            </p>
-          </div>
-
-          {/* Tasks */}
-          <div className="tasks-section">
-            <h3>Tasks</h3>
-            <ul>
-              <li>
-                Read Chapter 1 - 5 <span>Due January 7th</span>
-              </li>
-              <li>
-                Read Chapter 6 - 10 <span>Due January 14th</span>
-              </li>
-              <li>
-                Read Chapter 11 - 15 <span>Due January 21st</span>
-              </li>
-            </ul>
-            <button className="create-task-button">Create Task</button>
-          </div>
-
-          {/* Comments */}
-          <div className="comments-section">
-            <h3>Comments</h3>
-            <textarea placeholder="Add your comment..."></textarea>
-            <button className="add-comment-button">Add Comment</button>
-            <div className="comment-card">
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore.
-              </p>
-              <span>December 4th, 2024</span>
-              <div className="comment-tags">
-                <button>Read Chapter 1-5</button>
-                <button>Main Character</button>
-              </div>
-            </div>
-            {/* Repeat CommentCard for additional comments */}
-          </div>
+          <p className="book-description">{book.description}</p>
         </section>
       </main>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };

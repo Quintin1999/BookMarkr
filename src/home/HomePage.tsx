@@ -1,5 +1,6 @@
 import React from "react";
 import BookCard from "../components/bookCard/BookCard";
+import { addBookToPersonalLibrary } from "../scripts";
 
 const HomePage: React.FC = () => {
   return (
@@ -21,27 +22,33 @@ const HomePage: React.FC = () => {
       {/* Book Grid Section, replace with api calls*/}
       <section className="book-row">
         <BookCard
+          id="673bba82fcfb061b2ae19138"
           title="Book Title 1"
           author="Author 1"
           year={2024}
-          onAdd={() => alert("Added Book 1")}
+          thumbnail="/images/nobook.png"
+          onAdd={() => addBookToPersonalLibrary("673bba82fcfb061b2ae19138")}
+
         />
         <BookCard
           title="Book Title 2"
           author="Author 2"
           year={2023}
+          thumbnail="/images/nobook.png"
           onAdd={() => alert("Added Book 2")}
         />
         <BookCard
           title="Book Title 3"
           author="Author 3"
           year={2025}
+          thumbnail="/images/nobook.png"
           onAdd={() => alert("Added Book 3")}
         />
         <BookCard
           title="Book Title 4"
           author="Author 4"
           year={2022}
+          thumbnail="/images/nobook.png"
           onAdd={() => alert("Added Book 4")}
         />
       </section>

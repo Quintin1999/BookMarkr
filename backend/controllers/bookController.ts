@@ -7,6 +7,9 @@ import Club from '../models/clubSchema';
 import { AuthenticatedRequest } from '../middleware/authMiddleware';
 import { Request, Response } from 'express';
 import { Types } from 'mongoose';
+import mongoose from "mongoose";
+
+
 
 const GOOGLE_BOOKS_API_URL = 'https://www.googleapis.com/books/v1/volumes';
 
@@ -131,3 +134,34 @@ export const addBookToLibrary = async (req: AuthenticatedRequest, res: Response)
     }
 };
 
+
+// Controller function to fetch a book by ID
+
+
+
+
+export const getBookById = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      console.log(`Fetching book with ID: ${id}`); // Use backticks for template literals
+  
+      // Validate the ID
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ message: "Invalid ID format" });
+        return;
+      }
+  
+      // Fetch the book
+      const book = await Book.findById(id);
+      if (!book) {
+        res.status(404).json({ message: "Book not found" });
+        return;
+      }
+  
+      res.status(200).json(book);
+    } catch (error) {
+      console.error("Error fetching book:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+  

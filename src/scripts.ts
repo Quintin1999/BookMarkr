@@ -1,6 +1,6 @@
 const apiUrl: string = "http://localhost:3000/api"; // Base API URL
 import { FormEvent } from "react";
-import { BookCardProps } from "./components/BookCard";
+import { BookCardProps } from "./components/bookCard/BookCard";
 
 // Function to get the JWT token
 export async function getAuthToken(): Promise<string> {
@@ -152,33 +152,42 @@ interface ApiResponse {
   [key: string]: any; // Optional: For any additional data in the response
 }
 
-export async function addBookToPersonalLibrary(bookId:string): Promise<void>{
-  console.log('Book added to personal library: ${bookID}')
-  const token = getAuthToken();
-  if(!token){
+export async function addBookToPersonalLibrary(bookId: string): Promise<void> {
+  console.log("Adding to personal library. Book ID:", bookId);
+
+  const token = getAuthToken(); // Assuming getAuthToken is defined elsewhere and returns a string or null
+  if (!token) {
     alert("You must be logged in to add books.");
     return;
   }
-  const payload={googleId: bookId, targetType:"user"};
-  try{
-    const response = await fetch("http://localhost:3000/api/books/add",{
+
+  interface AddBookPayload {
+    googleId: string;
+    targetType: string;
+  }
+  const payload: AddBookPayload = { googleId: bookId, targetType: "user" };
+
+  try {
+    const response = await fetch("http://localhost:3000/api/books/add", {
       method: "POST",
-      headers:{
+      headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body:JSON.stringify(payload),
+      body: JSON.stringify(payload),
     });
+
     const result: ApiResponse = await response.json();
-    console.log("API response for personal library:", result.message);
-    if(response.ok){
+    console.log("API Response for personal library:", result); // Debugging
+
+    if (response.ok) {
       alert("Book added to personal library successfully!");
-    } else{
+    } else {
       console.error("Error adding book to personal library:", result.message);
       alert(`Error: ${result.message}`);
     }
-  }catch (error){
-    console.error("Error adding book to personal library:",error);
+  } catch (error) {
+    console.error("Error adding book to personal library:", error);
     alert("Error adding book to personal library.");
   }
 }

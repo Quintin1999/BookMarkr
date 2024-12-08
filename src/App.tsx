@@ -26,10 +26,10 @@ const App: React.FC = () => {
         <Route path="/home" element={<HomePage />} />
 
         {/*route for personal book page*/}
-        <Route path="/book" element={<PersonalBook />} />
+        <Route path="/books/:id" element={<PersonalBook />} />
 
         {/*route for personal library page*/}
-        <Route path="/plib" element={<PersonalLibraryPage />} />
+        <Route path="/personal-library" element={<PersonalLibraryPage />} />
 
         {/*route for debug page*/}
         <Route path="/debug" element={<Debug />} />
