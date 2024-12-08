@@ -1,0 +1,50 @@
+.hero {
+  position: relative;
+  height: 40vh;
+  width: 100%;
+  align-content: center;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  width: 60%;
+  height: 100%;
+  background-color: var(--primary-600);
+  z-index: -1;
+  left: 0;
+  top: 0;
+  border-radius: 0px 1000px 0px 0px;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  background-color: var(--primary-200);
+  z-index: -1;
+  right: 0;
+  top: 0;
+  border-radius: 1000px 0px 0px 0px;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.bookGrid {
+  margin-block: 4rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3rem;
+}
