@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 interface Book {
   _id: string;
   title: string;
-  author: string;
+  authors: string[]; // Note: updated to match the correct field name
   year: number;
   description: string;
   thumbnail?: string;
@@ -13,7 +13,6 @@ interface Book {
 
 const PersonalBook: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Get the book ID from the URL
-  console.log("Book ID from url:",id);
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -21,11 +20,11 @@ const PersonalBook: React.FC = () => {
     const fetchBook = async () => {
       try {
         const response = await fetch(`http://localhost:3000/api/books/${id}`);
-        console.log("Book ID being sent to backend:", id);
         if (!response.ok) {
           throw new Error("Failed to fetch book details");
         }
         const data = await response.json();
+        console.log("Fetched book data:", data); // Debugging
         setBook(data); // Update the state with the fetched book
       } catch (error) {
         console.error("Error fetching book details:", error);
@@ -54,13 +53,9 @@ const PersonalBook: React.FC = () => {
             {book.thumbnail && <img src={book.thumbnail} alt={book.title} />}
           </div>
           <h2>{book.title}</h2>
-          <p>{book.author}</p>
+          <p>By: {book.authors?.join(", ") || "Unknown Author"}</p> {/* Updated here */}
           <p>Publication Year: {book.year}</p>
-          <div className="metadata">
-            <p>
-              <strong>Date Added:</strong> {book.dateAdded}
-            </p>
-          </div>
+          <p>Date Added: {new Date(book.dateAdded).toLocaleDateString()}</p>
         </section>
 
         {/* Right Column */}

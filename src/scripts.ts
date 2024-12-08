@@ -123,16 +123,29 @@ export async function searchBooks(query: string): Promise<BookCardProps[]> {
     const response = await fetch(
       `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`
     );
+
     const data: GoogleBooksResponse = await response.json();
 
     if (data.items && data.items.length > 0) {
       // Map raw API data to BookCardProps
-      return data.items.map((book) => ({
-        title: book.volumeInfo.title || "Unknown Title",
-        author: book.volumeInfo.authors?.join(", ") || "Unknown Author",
-        year: new Date(book.volumeInfo.publishedDate || "1970-01-01").getFullYear(),
-        onAdd: () => console.log(`Adding ${book.volumeInfo.title} to personal library.`),
-      }));
+      return data.items.map((book) => {
+        const id=book.id;
+        const title = book.volumeInfo.title || "Unknown Title";
+        const author = book.volumeInfo.authors?.join(", ") || "Unknown Author";
+        const year = book.volumeInfo.publishedDate
+          ? new Date(book.volumeInfo.publishedDate).getFullYear()
+          : 1970; // Default year if none provided
+        const thumbnail = book.volumeInfo.imageLinks?.thumbnail || "/public/images/nobook.png";
+
+        return {
+          id,
+          title,
+          author,
+          year,
+          thumbnail, // Add thumbnail to props
+          onAdd: () => console.log(`Adding ${title} to personal library.`),
+        };
+      });
     } else {
       alert("No results found.");
       return [];
@@ -143,6 +156,7 @@ export async function searchBooks(query: string): Promise<BookCardProps[]> {
     return [];
   }
 }
+
 
 
 
