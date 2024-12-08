@@ -52,9 +52,9 @@ const Navbar: React.FC = () => {
         {/* User Info (Optional, Only for Logged-in Users) */}
         {loggedIn && (
           <div className={styles.user}>
-            <span className="navbar-username">Username</span>
+            <p className="navbar-username">Username</p>
             <img
-              src="/images/user-icon.png"
+              src="/images/profile-icon.svg"
               alt="User Icon"
               className="navbar-user-icon"
             />
