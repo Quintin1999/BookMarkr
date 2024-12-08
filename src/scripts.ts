@@ -1,5 +1,6 @@
 const apiUrl: string = "http://localhost:3000/api"; // Base API URL
 import { FormEvent } from "react";
+import { BookCardProps } from "./components/BookCard";
 
 // Function to get the JWT token
 export async function getAuthToken(): Promise<string> {
@@ -100,100 +101,50 @@ interface GoogleBooksResponse {
   items: {
     id: string;
     volumeInfo: {
-      title: string;
+      title?: string;
       authors?: string[];
-      description?: string;
+      publishedDate?: string;
       imageLinks?: {
-        thumbnail?: string; // This is where the thumbnail exists
+        thumbnail?: string;
       };
     };
   }[];
 }
 
+
 // Function to search Google Books and handle UI updates
-export async function searchBooks(event: React.FormEvent<HTMLFormElement>): Promise<void> {
-  event.preventDefault(); // Prevent the default form submission
-
-  // Get the query input value
-  const queryInput = document.getElementById("query") as HTMLInputElement;
-  const resultsContainer = document.getElementById("searchResults") as HTMLElement;
-
-  if (!queryInput || !resultsContainer) {
-    console.error("Required DOM elements not found.");
-    alert("Could not find required elements.");
-    return;
-  }
-
-  const query: string = queryInput.value.trim();
-
-  if (!query) {
+export async function searchBooks(query: string): Promise<BookCardProps[]> {
+  if (!query.trim()) {
     alert("Please enter a search term.");
-    return;
+    return [];
   }
 
   try {
-    // Fetch books from Google Books API
     const response = await fetch(
       `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`
     );
     const data: GoogleBooksResponse = await response.json();
 
-    // Clear previous results
-    resultsContainer.innerHTML = "";
-
     if (data.items && data.items.length > 0) {
-      // Display each book in the results
-      //LEXI IF YOU WANT TO CHANGE HOW THE BOOKS ARE OUTPUT WHEN SEARCHED, PLEASE LOOK HERE
-      data.items.forEach((book) => {
-        const bookDiv = document.createElement("div");
-
-        // Add to Personal Library Button
-        const addToUserButton = document.createElement("button");
-        addToUserButton.textContent = "Add to My Library";
-        addToUserButton.addEventListener("click", () => {
-          console.log("Adding book to personal library:", book.id);
-          addBookToPersonalLibrary(book.id); // Function should be implemented separately
-        });
-
-        // Add to Club Library Button
-        const addToClubButton = document.createElement("button");
-        addToClubButton.textContent = "Add to Club Library";
-        addToClubButton.addEventListener("click", async () => {
-          try {
-            const clubId = await selectClub(); // Function should return the selected club ID
-            if (clubId) {
-              await addBookToClubLibrary(book.id, clubId); // Function to handle book addition to the club
-            } else {
-              alert("No club selected.");
-            }
-          } catch (error) {
-            console.error("Error adding book to club library:", error);
-          }
-        });
-        
-        // Display book information
-        const thumbnail = book.volumeInfo.imageLinks?.thumbnail || "/public/images/nobook.png";
-
-        bookDiv.innerHTML = `
-          <img src="${thumbnail}" alt="Book cover" />
-          <p><strong>${book.volumeInfo.title}</strong> by ${
-          book.volumeInfo.authors?.join(", ") || "Unknown"
-        }</p>
-        `;
-
-        bookDiv.appendChild(addToUserButton);
-        bookDiv.appendChild(addToClubButton);
-
-        resultsContainer.appendChild(bookDiv);
-      });
+      // Map raw API data to BookCardProps
+      return data.items.map((book) => ({
+        title: book.volumeInfo.title || "Unknown Title",
+        author: book.volumeInfo.authors?.join(", ") || "Unknown Author",
+        year: new Date(book.volumeInfo.publishedDate || "1970-01-01").getFullYear(),
+        onAdd: () => console.log(`Adding ${book.volumeInfo.title} to personal library.`),
+      }));
     } else {
-      resultsContainer.innerHTML = "<p>No results found.</p>";
+      alert("No results found.");
+      return [];
     }
   } catch (error) {
     console.error("Error searching Google Books:", error);
     alert("Error searching books.");
+    return [];
   }
 }
+
+
 
 interface ApiResponse {
   success?: boolean;
