@@ -1,25 +1,35 @@
 import React from "react";
 import { submitSignupForm } from "../scripts";
+import styles from "../styles/login.module.css";
 
 const SignupPage: React.FC = () => {
   return (
-    <form onSubmit={submitSignupForm}>
-      <h2>Create User</h2>
+    <main className={`${styles.formPage} container`}>
+      <div className={`${styles.formContainer}`}>
+        <form onSubmit={submitSignupForm} className={styles.loginForm}>
+          <h1>Sign Up</h1>
 
-      <label htmlFor="username">Username:</label>
-      <input type="text" name="username" id="username" required />
-      <br />
+          <label htmlFor="username">
+            Username
+            <input type="text" name="username" id="username" required />
+          </label>
 
-      <label htmlFor="email">Email:</label>
-      <input type="email" name="email" id="email" required />
-      <br />
+          <label htmlFor="email">
+            Email
+            <input type="email" name="email" id="email" required />
+          </label>
 
-      <label htmlFor="password">Password:</label>
-      <input type="password" name="password" id="password" required />
-      <br />
+          <label htmlFor="password">
+            Password
+            <input type="password" name="password" id="password" required />
+          </label>
 
-      <button type="submit">Create User</button>
-    </form>
+          <button type="submit">Sign Up</button>
+        </form>
+
+        <img className={styles.bookImage} src="/images/book-vector.svg" />
+      </div>
+    </main>
   );
 };
 
