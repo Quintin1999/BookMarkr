@@ -21,15 +21,16 @@ const BookCard: React.FC<BookCardProps> = ({
 }) => {
   return (
     <figure className={styles.bookCard}>
-      <Link to={`/books/${id}`}>
-        <div className={styles.bookImage}>
+      <div className={styles.bookImage}>
+        <Link to={`/books/${id}`}>
           <img src={thumbnail} alt={title} />
+        </Link>
 
-          <button className={styles.addBook} onClick={onAdd}>
-            <span className={styles.addBookText}>Add Book</span> +
-          </button>
-        </div>
-      </Link>
+        <button className={styles.addBook} onClick={onAdd}>
+          <span className={styles.addBookText}>Add Book</span> +
+        </button>
+      </div>
+
       <figcaption className={styles.bookDetails}>
         <h3 className={styles.bookTitle}>{title}</h3>
         <p className={styles.bookAuthor}>{author}</p>
