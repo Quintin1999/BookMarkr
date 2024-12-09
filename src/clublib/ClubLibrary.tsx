@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getAuthToken } from "../scripts";
 import BookGrid from "../components/bookGrid/BookGrid";
 import { Book } from "../types/types";
+import styles from "./clubLibrary.module.css";
+
 interface Club {
   _id: string;
   name: string;
@@ -13,8 +15,6 @@ interface Club {
   };
   members: { _id: string; username: string }[];
 }
-
-
 
 const ClubLibrary: React.FC = () => {
   const { clubId } = useParams<{ clubId: string }>();
@@ -90,29 +90,33 @@ const ClubLibrary: React.FC = () => {
   }
 
   return (
-    <div className="club-library-page">
-      <section className="club-details">
-        <h1>{club.name}</h1>
-        <p>{club.description}</p>
-        <p>
-          <strong>Owner:</strong> {club.owner.username}
-        </p>
-      </section>
+    <main className="container">
+      <div className={styles.clubPage}>
+        <section className="club-details">
+          <h1>{club.name}</h1>
+          <p>{club.description}</p>
+          <p>
+            <strong>Owner:</strong> {club.owner.username}
+          </p>
+        </section>
 
-      <section className="club-members">
-        <h2>Members</h2>
-        <ul>
-          {club.members.map((member) => (
-            <li key={member._id}>{member.username}</li>
-          ))}
-        </ul>
-      </section>
+        <section className={styles.clubMember}>
+          <h2>Members</h2>
+          <ul>
+            {club.members.map((member) => (
+              <li key={member._id} className={styles.member}>
+                {member.username}
+              </li>
+            ))}
+          </ul>
+        </section>
 
-      <section className="club-library">
-        <h2>Library</h2>
-        <BookGrid books={books} onAdd={handleBookClick} />
-      </section>
-    </div>
+        <section className="club-library">
+          <h2>Library</h2>
+          <BookGrid books={books} onAdd={handleBookClick} />
+        </section>
+      </div>
+    </main>
   );
 };
 

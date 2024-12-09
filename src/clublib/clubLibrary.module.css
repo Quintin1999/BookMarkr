@@ -1,0 +1,20 @@
+.clubPage {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-height: calc(100vh - 72px - 48px);
+}
+
+.clubPage ul {
+  list-style-type: none;
+}
+
+.clubMember {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.member {
+  margin-bottom: 0.5rem;
+}

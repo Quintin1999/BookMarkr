@@ -74,16 +74,10 @@ const PersonalLibraryPage: React.FC = () => {
       <div className={`${styles.libraryGrid}`}>
         <h1>My Personal Library</h1>
 
-        {/* Personal Library Section */}
-        {books.length > 0 ? (
-          <BookGrid books={books} onAdd={(bookId) => console.log(bookId)} />
-        ) : (
-          <p>You should add books!</p>
-        )}
-
         {/* Google Books Search Section */}
         <div className={styles.searchSection}>
           <h2>Find More Books</h2>
+
           <div className={styles.searchContainer}>
             <input
               type="text"
@@ -111,6 +105,13 @@ const PersonalLibraryPage: React.FC = () => {
             !loadingSearch && <p>No books found. Try another query!</p>
           )}
         </div>
+
+        {/* Personal Library Section */}
+        {books.length > 0 ? (
+          <BookGrid books={books} onAdd={(bookId) => console.log(bookId)} />
+        ) : (
+          <p>You should add books!</p>
+        )}
       </div>
     </main>
   );

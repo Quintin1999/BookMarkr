@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAuthToken } from "../scripts";
+import styles from "./clubsPage.module.css";
 
 type Club = {
   _id: string;
@@ -43,26 +44,37 @@ const ClubsPage: React.FC = () => {
   if (loading) return <p>Loading clubs...</p>;
 
   return (
-    <main>
-      <h1>My Clubs</h1>
-      {clubs.length > 0 ? (
-        <ul>
-          {clubs.map((club) => (
-            <li key={club._id} style={{ marginBottom: "1rem" }}>
-              <h2>
-                {/* Link to the club library page */}
-                <Link to={`/club-library/${club._id}`} style={{ textDecoration: "none", color: "blue" }}>
+    <main className="container">
+      <div className={styles.clubPage}>
+        <h1>My Clubs</h1>
+        {clubs.length > 0 ? (
+          <ul>
+            {clubs.map((club) => (
+              <li
+                key={club._id}
+                style={{ marginBottom: "1rem" }}
+                className={styles.clubCard}
+              >
+                <Link
+                  to={`/club-library/${club._id}`}
+                  className={styles.clubName}
+                >
                   {club.name}
                 </Link>
-              </h2>
-              <p><strong>Description:</strong> {club.description}</p>
-              <p><strong>Role:</strong> {club.role}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No clubs found.</p>
-      )}
+
+                <p className={styles.clubDescription}>
+                  <strong>Description:</strong> {club.description}
+                </p>
+                <p>
+                  <strong>Role:</strong> {club.role}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No clubs found.</p>
+        )}
+      </div>
     </main>
   );
 };

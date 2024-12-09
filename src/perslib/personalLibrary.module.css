@@ -12,3 +12,28 @@
 .libraryGrid:last-child {
   margin-bottom: 4rem;
 }
+
+.searchSection {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .searchContainer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+
+    input {
+      width: 100%;
+      padding: 0px 0.75rem;
+      font-size: 1rem;
+      background-color: var(--primary-300);
+      border: 1px solid var(--primary-800);
+    }
+  }
+}

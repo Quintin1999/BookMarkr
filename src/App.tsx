@@ -35,7 +35,7 @@ const App: React.FC = () => {
         <Route path="/personal-library" element={<PersonalLibraryPage />} />
 
         {/*route for all your club landing page*/}
-        <Route path="/clubs" element={<ClubsPage/>}/>
+        <Route path="/clubs" element={<ClubsPage />} />
 
         {/*route for club library*/}
         <Route path="/club-library/:clubId" element={<ClubLibrary />} />

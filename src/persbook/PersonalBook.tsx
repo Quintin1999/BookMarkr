@@ -102,7 +102,7 @@ const PersonalBook: React.FC = () => {
 
   return (
     <main className="container">
-      <div className={styles.bookGrid}>
+ 
         <section className={styles.bookInformation}>
           {book.thumbnail && (
             <img
