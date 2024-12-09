@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-<<<<<<< HEAD
-import { jwtDecode } from "jwt-decode";
-import { createTaskForPersonalBook } from "../scripts";
-import { getAuthToken } from "../scripts";
-
-import { Book, Task, Comment as CommentType } from "../types/types";
-import Comment from "../components/comment/comment";
-
-=======
 
 import { getAuthToken } from "../scripts";
 
 import { Book, Task, Comment as CommentType } from "../types/types";
 import Comment from "../components/comment/Comment";
->>>>>>> 5c327e4e5c379317d57c07739c76295db121395a
 import styles from "./personalBook.module.css";
-import TaskForm from "../components/taskForm/taskForm";
+import TaskForm from "../components/taskForm/TaskForm";
 
 const PersonalBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,20 +23,12 @@ const PersonalBook: React.FC = () => {
     null
   );
   const [newCommentContent, setNewCommentContent] = useState<string>("");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCurrentUser=async()=>{
-    const token= await getAuthToken();
-    if(token){
-      const decodedToken:{userId:string}=jwtDecode(token);
-      setCurrentUserId(decodedToken.userId)
-    }
-  }
     const fetchBookAndTasks = async () => {
       try {
         const token = await getAuthToken();
-    
+
         // Fetch book details
         const bookResponse = await fetch(
           `http://localhost:3000/api/books/${id}`,
@@ -55,10 +37,10 @@ const PersonalBook: React.FC = () => {
           }
         );
         if (!bookResponse.ok) throw new Error("Failed to fetch book details");
-    
+
         const bookData = await bookResponse.json();
         setBook(bookData);
-    
+
         // Fetch tasks for the specific book
         const tasksResponse = await fetch(
           `http://localhost:3000/api/tasks/book/${id}`,
@@ -70,19 +52,14 @@ const PersonalBook: React.FC = () => {
           throw new Error("Failed to fetch tasks for this book");
 
         const tasksData: Task[] = await tasksResponse.json();
-    
-        // Filter tasks based on the current user's ID
-        const userTasks = tasksData.filter((task) => task.createdBy === currentUserId);
-    
-        setTasks(userTasks);
+        setTasks(tasksData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchCurrentUser();
+
     fetchBookAndTasks();
   }, [id]);
 
