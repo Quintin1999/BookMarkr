@@ -92,24 +92,28 @@ const ClubLibrary: React.FC = () => {
   return (
     <main className="container">
       <div className={styles.clubPage}>
-        <section className="club-details">
-          <h1>{club.name}</h1>
-          <p>{club.description}</p>
-          <p>
-            <strong>Owner:</strong> {club.owner.username}
-          </p>
-        </section>
+        <div className={styles.header}>
+          <section className="club-details">
+            <h1>{club.name}</h1>
+            <p>{club.description}</p>
+            <p>
+              <strong>Owner:</strong> {club.owner.username}
+            </p>
+          </section>
 
-        <section className={styles.clubMember}>
-          <h2>Members</h2>
-          <ul>
-            {club.members.map((member) => (
-              <li key={member._id} className={styles.member}>
-                {member.username}
-              </li>
-            ))}
-          </ul>
-        </section>
+          <section className={styles.clubMember}>
+            <h2>Members</h2>
+            <ul>
+              {club.members.map((member) => (
+                <li key={member._id} className={styles.member}>
+                  {member.username}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <img src={"/images/book-vector.svg"} />
+        </div>
 
         <section className="club-library">
           <h2>Library</h2>
