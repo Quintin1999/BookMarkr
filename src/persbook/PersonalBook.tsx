@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
+import { jwtDecode } from "jwt-decode";
 import { createTaskForPersonalBook } from "../scripts";
 import { getAuthToken } from "../scripts";
 
@@ -10,7 +10,9 @@ interface Task {
   _id: string;
   description: string;
   status: string;
+  createdBy: string; // Add this to represent the task creator's user ID
 }
+
 
 interface Comment {
   _id: string;
@@ -31,36 +33,49 @@ const PersonalBook: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(null);
   const [newCommentContent, setNewCommentContent] = useState<string>("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchCurrentUser=async()=>{
+    const token= await getAuthToken();
+    if(token){
+      const decodedToken:{userId:string}=jwtDecode(token);
+      setCurrentUserId(decodedToken.userId)
+    }
+  }
     const fetchBookAndTasks = async () => {
       try {
         const token = await getAuthToken();
-
+    
         // Fetch book details
         const bookResponse = await fetch(`http://localhost:3000/api/books/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!bookResponse.ok) throw new Error("Failed to fetch book details");
-
+    
         const bookData = await bookResponse.json();
         setBook(bookData);
-
+    
         // Fetch tasks for the specific book
         const tasksResponse = await fetch(`http://localhost:3000/api/tasks/book/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!tasksResponse.ok) throw new Error("Failed to fetch tasks for this book");
-
+    
         const tasksData: Task[] = await tasksResponse.json();
-        setTasks(tasksData);
+    
+        // Filter tasks based on the current user's ID
+        const userTasks = tasksData.filter((task) => task.createdBy === currentUserId);
+    
+        setTasks(userTasks);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-
+    
+    fetchCurrentUser();
     fetchBookAndTasks();
   }, [id]);
 
@@ -122,8 +137,6 @@ const PersonalBook: React.FC = () => {
             {book.thumbnail && <img src={book.thumbnail} alt={book.title} />}
           </div>
           <h2>{book.title}</h2>
-
-          <p>By: {book.author.join(", ")}</p>
 
           <p>By: {book.author?.join(", ") || "Unknown Author"}</p>{" "}
           {/* Updated here */}
