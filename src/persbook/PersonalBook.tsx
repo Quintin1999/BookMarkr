@@ -1,25 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
 import { getAuthToken } from "../scripts";
 import { Book, Task, Comment as CommentType } from "../types/types";
 import Comment from "../components/comment/Comment";
-import styles from "./personalBook.module.css";
 import TaskForm from "../components/taskForm/TaskForm";
+import styles from "./personalBook.module.css";
 import { jwtDecode } from "jwt-decode";
-
 
 const PersonalBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [comments, setComments] = useState<Record<string, CommentType[]>>({});
-  const [loading, setLoading] = useState(true);
-  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
-  const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(null);
-
-  const [newCommentContent, setNewCommentContent] = useState<string>("");
+  const [newComment, setNewComment] = useState<string>("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const token = await getAuthToken();
@@ -36,75 +31,69 @@ const PersonalBook: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchCurrentUser=async()=>{
-    const token= await getAuthToken();
-    if(token){
-      const decodedToken:{userId:string}=jwtDecode(token);
-      setCurrentUserId(decodedToken.userId)
-    }
-  }
-    const fetchBookAndTasks = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const [bookData, tasksData] = await Promise.all([
-          fetchWithAuth(`http://localhost:3000/api/books/${id}`),
-          fetchWithAuth(`http://localhost:3000/api/tasks/book/${id}`),
-        ]);
+        const token = await getAuthToken();
+        if (token) {
+          const decodedToken: { id: string } = jwtDecode(token);
+          setCurrentUserId(decodedToken.id);
+        }
+
+        const bookData = await fetchWithAuth(
+          `http://localhost:3000/api/books/${id}`
+        );
         setBook(bookData);
+
+        const tasksData = await fetchWithAuth(
+          `http://localhost:3000/api/tasks/book/${id}`
+        );
         setTasks(tasksData);
       } catch (error) {
-        console.error("Error fetching book and tasks:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchCurrentUser();
-    fetchBookAndTasks();
+
+    fetchData();
   }, [id]);
-
-  // Filter tasks by `currentUserId` when both tasks and currentUserId are available
-  const filteredTasks = React.useMemo(() => {
-    if (!currentUserId) return [];
-    return tasks.filter((task) => task.createdBy === currentUserId);
-  }, [tasks, currentUserId]);
-
-  useEffect(() => {
-    filteredTasks.forEach((task) => fetchCommentsForTask(task._id));
-  }, [filteredTasks]);
 
   const fetchCommentsForTask = async (taskId: string) => {
     try {
-      setLoadingComments((prev) => ({ ...prev, [taskId]: true }));
       const taskComments = await fetchWithAuth(
         `http://localhost:3000/api/tasks/${taskId}/comments`
       );
       setComments((prev) => ({ ...prev, [taskId]: taskComments }));
     } catch (error) {
       console.error(`Error fetching comments for task ${taskId}:`, error);
-    } finally {
-      setLoadingComments((prev) => ({ ...prev, [taskId]: false }));
     }
   };
 
-  useEffect(() => {
-    tasks.forEach((task) => fetchCommentsForTask(task._id));
-  }, [tasks]);
-
-  const addComment = async (taskId: string) => {
+  const addComment = async (taskId: string, content: string) => {
     try {
       await fetchWithAuth(`http://localhost:3000/api/comments/`, {
         method: "POST",
         body: JSON.stringify({
           taskId,
           bookId: book?._id,
-          content: newCommentContent,
+          content,
         }),
       });
-      setNewCommentContent("");
-      setAddingCommentTaskId(null);
-      fetchCommentsForTask(taskId); // Refresh comments for the task
+      await fetchCommentsForTask(taskId); // Refresh comments
     } catch (error) {
       console.error("Error adding comment:", error);
+    }
+  };
+
+  const refreshTasks = async () => {
+    try {
+      const tasksData = await fetchWithAuth(
+        `http://localhost:3000/api/tasks/book/${id}`
+      );
+      setTasks(tasksData);
+    } catch (error) {
+      console.error("Error refreshing tasks:", error);
     }
   };
 
@@ -133,60 +122,66 @@ const PersonalBook: React.FC = () => {
         <section className={styles.rightColumn}>
           <p>{book.description}</p>
 
-          <TaskForm bookId={book._id} />
+          <TaskForm bookId={book._id} onTaskAdded={refreshTasks} />
 
           <div className={styles.taskSection}>
             <h3>Tasks</h3>
-            {filteredTasks.length > 0 ? (
+            {tasks.length > 0 ? (
               <ul>
-                {filteredTasks.map((task) => (
+                {tasks.map((task) => (
                   <li key={task._id}>
                     <div className={styles.task}>
-
-
                       <p className={styles.taskDescription}>
                         {task.description}
                       </p>
                       <p className={styles.taskStatus}>{task.status}</p>
-                      <button onClick={() => setAddingCommentTaskId(task._id)}>
-                        Add Comment
+                      <button onClick={() => fetchCommentsForTask(task._id)}>
+                        View Comments
                       </button>
                     </div>
 
-                    {addingCommentTaskId === task._id && (
-                      <div className={styles.addComment}>
-                        <input
-                          value={newCommentContent}
-                          onChange={(e) => setNewCommentContent(e.target.value)}
-                          placeholder="Enter your comment"
-                        />
-                        <button onClick={() => addComment(task._id)}>
-                          Submit
-                        </button>
-                        <button onClick={() => setAddingCommentTaskId(null)}>
-                          X
-                        </button>
-                      </div>
-                    )}
-
-                    {loadingComments[task._id] ? (
-                      <p>Loading comments...</p>
-                    ) : (
-                      <ul>
-                        {comments[task._id]?.length ? (
-                          comments[task._id].map((comment) => (
-                            <li key={comment._id}>
-                              <Comment
-                                content={comment.content}
-                                userId={comment.userId}
-                              />
-                            </li>
-                          ))
-                        ) : (
-                          <p>Add your first comment.</p>
-                        )}
-                      </ul>
-                    )}
+                    <div className={styles.addComment}>
+                      <input
+                        placeholder="Add a comment"
+                        value={newComment} // Controlled input
+                        onChange={(e) => setNewComment(e.target.value)} // Update state
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && newComment.trim()) {
+                            addComment(task._id, newComment.trim());
+                            setNewComment(""); // Clear input
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          if (newComment.trim()) {
+                            addComment(task._id, newComment.trim());
+                            setNewComment(""); // Clear input
+                          }
+                        }}
+                      >
+                        Add
+                      </button>
+                    </div>
+                    <ul>
+                      {comments[task._id]?.length ? (
+                        <>
+                          <p>{comments[task._id].length} comment(s) found:</p>
+                          <ul>
+                            {comments[task._id].map((comment) => (
+                              <li key={comment._id}>
+                                <Comment
+                                  content={comment.content}
+                                  userId={comment.userId}
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </ul>
                   </li>
                 ))}
               </ul>
