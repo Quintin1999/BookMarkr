@@ -1,0 +1,15 @@
+.comment {
+  width: 100%;
+  background-color: var(--primary-300);
+  margin-block: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--primary-500);
+  border-radius: 0.5rem;
+
+  .username {
+    color: var(--primary-800);
+    font-size: 0.875rem;
+    font-weight: bold;
+    margin-bottom: 0.125rem;
+  }
+}

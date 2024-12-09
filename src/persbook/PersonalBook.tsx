@@ -124,13 +124,30 @@ const PersonalBook: React.FC = () => {
                 {tasks.map((task) => (
                   <li key={task._id}>
                     <div className={styles.task}>
-                      <p>
-                        {task.description} - <strong>{task.status}</strong>
-                      </p>
+                      <p className={styles.taskDescription}>
+                        {task.description}
+                      </p>{" "}
+                      <p className={styles.taskStatus}>{task.status}</p>
                       <button onClick={() => setAddingCommentTaskId(task._id)}>
                         Add Comment
                       </button>
                     </div>
+
+                    {addingCommentTaskId === task._id && (
+                      <div className={styles.addComment}>
+                        <input
+                          value={newCommentContent}
+                          onChange={(e) => setNewCommentContent(e.target.value)}
+                          placeholder="Enter your comment"
+                        />
+                        <button onClick={() => addComment(task._id)}>
+                          Submit
+                        </button>
+                        <button onClick={() => setAddingCommentTaskId(null)}>
+                          X
+                        </button>
+                      </div>
+                    )}
 
                     {loadingComments[task._id] ? (
                       <p>Loading comments...</p>
@@ -146,25 +163,9 @@ const PersonalBook: React.FC = () => {
                             </li>
                           ))
                         ) : (
-                          <p>No comments yet.</p>
+                          <p>Add your first comment.</p>
                         )}
                       </ul>
-                    )}
-
-                    {addingCommentTaskId === task._id && (
-                      <div className="add-comment-section">
-                        <textarea
-                          value={newCommentContent}
-                          onChange={(e) => setNewCommentContent(e.target.value)}
-                          placeholder="Enter your comment"
-                        />
-                        <button onClick={() => addComment(task._id)}>
-                          Submit
-                        </button>
-                        <button onClick={() => setAddingCommentTaskId(null)}>
-                          Cancel
-                        </button>
-                      </div>
                     )}
                   </li>
                 ))}
