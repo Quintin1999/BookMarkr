@@ -1,6 +1,7 @@
 import React from "react";
 import BookCard from "../bookCard/BookCard";
 import { Book } from "../../types/types";
+import styles from "./bookGrid.module.css";
 
 interface BookGridProps {
   books: Book[];
@@ -9,7 +10,7 @@ interface BookGridProps {
 
 const BookGrid: React.FC<BookGridProps> = ({ books, onAdd }) => {
   return (
-    <div className="book-grid">
+    <div className={styles.bookGrid}>
       {books.map((book) => (
         <BookCard
           key={book._id}

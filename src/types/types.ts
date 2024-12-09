@@ -9,11 +9,18 @@ export interface Book {
   onAdd?: () => void;
 }
 
-export interface BookCardProps {
-  _id: string; // Add the book ID for navigation
-  title: string;
-  author: string[];
-  year: number;
-  thumbnail: string; // Add thumbnail to props
-  // Triggered when "+" button is clicked
+export interface Task {
+  _id: string;
+  description: string;
+  status: string;
+}
+
+export interface Comment {
+  _id: string;
+  taskId: string;
+  content: string;
+  userId: {
+    _id: string;
+    username: string;
+  };
 }
