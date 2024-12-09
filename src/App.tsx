@@ -10,7 +10,6 @@ import Footer from "./components/footer/Footer.tsx";
 import HomePage from "./home/HomePage.tsx";
 import PersonalBook from "./persbook/PersonalBook.tsx";
 import PersonalLibraryPage from "./perslib/PersonalLibrary.tsx";
-import Debug from "./debug/Debug.tsx";
 import ClubLibrary from "./clublib/ClubLibrary.tsx";
 import ClubBook from "./clubbook/ClubBook.tsx";
 
