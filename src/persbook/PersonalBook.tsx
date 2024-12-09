@@ -169,8 +169,7 @@ const PersonalBook: React.FC = () => {
                           comments[task._id].map((comment) => (
                             <li key={comment._id}>
                               <p>
-                                <strong>{comment.userId?.username || "Unknown User"}:</strong>{" "}
-                                {comment.content}
+                                <strong>{comment.userId.username}:</strong> {comment.content}
                               </p>
                             </li>
                           ))
@@ -178,6 +177,7 @@ const PersonalBook: React.FC = () => {
                           <p>No comments yet.</p>
                         )}
                       </ul>
+
                     )}
 
                     {addingCommentTaskId === task._id && (
