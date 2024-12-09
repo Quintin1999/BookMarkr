@@ -1,4 +1,5 @@
-import React, { useState, FormEvent } from "react";
+import { useState, FormEvent } from "react";
+import styles from "./taskForm.module.css";
 
 const TaskForm = ({ bookId }: { bookId: string }) => {
   const [description, setDescription] = useState<string>("");
@@ -45,7 +46,7 @@ const TaskForm = ({ bookId }: { bookId: string }) => {
   }
 
   return (
-    <form onSubmit={createTaskForPersonalBook}>
+    <form onSubmit={createTaskForPersonalBook} className={styles.taskForm}>
       <h3>Create a Task</h3>
       <input
         id="personalTaskDescription"
@@ -61,7 +62,11 @@ const TaskForm = ({ bookId }: { bookId: string }) => {
         placeholder="Enter Task Name"
         required
       />
-      <button type="submit" disabled={!description.trim()}>
+      <button
+        type="submit"
+        disabled={!description.trim()}
+        className={styles.submitButton}
+      >
         Create Task
       </button>
     </form>
