@@ -158,7 +158,6 @@ interface PopulatedClub {
 
 export const getUserClubs = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const userId = req.user?.id;
-
     if (!userId) {
         console.error('No authenticated user ID found');
         res.status(401).json({ message: 'User is not authenticated' });
@@ -169,21 +168,24 @@ export const getUserClubs = async (req: AuthenticatedRequest, res: Response): Pr
         console.log('Fetching user clubs for User ID:', userId);
 
         const user = await User.findById(userId)
-            .populate<{ createdClubs: PopulatedClub[] }>('createdClubs', 'name description')
-            .populate<{ joinedClubs: PopulatedClub[] }>('joinedClubs', 'name description');
 
+            //.populate<{ createdClubs: PopulatedClub[] }>('createdClubs', 'name description')
+            .populate<{ joinedClubs: PopulatedClub[] }>('joinedClubs', 'name description');
+            console.log(user)
         if (!user) {
             res.status(404).json({ message: 'User not found' });
             return;
         }
 
+            
+
         const clubs = [
-            ...(user.createdClubs as PopulatedClub[]).map((club) => ({
+            /*...(user.createdClubs as PopulatedClub[]).map((club) => ({
                 _id: club._id.toString(),
                 name: club.name,
                 description: club.description,
                 role: 'Owner',
-            })),
+            })),*/
             ...(user.joinedClubs as PopulatedClub[]).map((club) => ({
                 _id: club._id.toString(),
                 name: club.name,
@@ -192,7 +194,7 @@ export const getUserClubs = async (req: AuthenticatedRequest, res: Response): Pr
             })),
         ];
 
-        console.log('Formatted clubs:', clubs);
+        //console.log('Formatted clubs:', clubs); debugging
         res.status(200).json(clubs);
     } catch (error) {
         console.error('Error in getUserClubs:', error);
