@@ -4,29 +4,19 @@ import { useParams } from "react-router-dom";
 import { createTaskForPersonalBook } from "../scripts";
 import { getAuthToken } from "../scripts";
 
-import { Book } from "../types/types";
+import { Book, Task, Comment as CommentType } from "../types/types";
+import Comment from "../components/comment/comment";
 
-interface Task {
-  _id: string;
-  description: string;
-  status: string;
-}
-
-interface Comment {
-  _id: string;
-  taskId: string;
-  content: string;
-  userId: {
-    _id: string;
-    username: string;
-  };
-}
+import styles from "./personalBook.module.css";
+import TaskForm from "../components/taskForm/taskForm";
 
 const PersonalBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [comments, setComments] = useState<{ [taskId: string]: Comment[] }>({});
+  const [comments, setComments] = useState<{ [taskId: string]: CommentType[] }>(
+    {}
+  );
   const [loadingComments, setLoadingComments] = useState<{
     [taskId: string]: boolean;
   }>({});
@@ -89,7 +79,7 @@ const PersonalBook: React.FC = () => {
       if (!response.ok)
         throw new Error("Failed to fetch comments for the task");
 
-      const taskComments: Comment[] = await response.json();
+      const taskComments: CommentType[] = await response.json();
       setComments((prev) => ({ ...prev, [taskId]: taskComments }));
     } catch (error) {
       console.error("Error fetching comments for task:", error);
@@ -130,16 +120,21 @@ const PersonalBook: React.FC = () => {
   if (!book) return <p>Book not found.</p>;
 
   return (
-    <div className="personal-book-page">
-      <main className="content">
-        <section className="left-column">
-          <div className="book-cover">
-            {book.thumbnail && <img src={book.thumbnail} alt={book.title} />}
-          </div>
+    <main className="container">
+      <div className={styles.bookGrid}>
+        <section className={styles.bookInformation}>
+          {book.thumbnail && (
+            <img
+              src={book.thumbnail}
+              alt={book.title}
+              className={styles.bookCover}
+            />
+          )}
           <h2>{book.title}</h2>
           <p>By: {book.author?.join(", ") || "Unknown Author"}</p>
+
           {/* Updated here */}
-          <p>Publication Year: {book.year}</p>
+          <p>Publication Year: {book.year || "Unknown"}</p>
           {book.dateAdded ? (
             <p>Date Added: {new Date(book.dateAdded).toLocaleDateString()}</p>
           ) : (
@@ -150,17 +145,7 @@ const PersonalBook: React.FC = () => {
         <section className="right-column">
           <div className="book-description">{book.description}</div>
 
-          <div className="task-creation">
-            <h3>Create a Task</h3>
-            <form onSubmit={createTaskForPersonalBook}>
-              <textarea
-                id="personalTaskDescription"
-                placeholder="Enter task description"
-                required
-              />
-              <button type="submit">Create Task</button>
-            </form>
-          </div>
+          <TaskForm bookId={book._id} />
 
           <div className="tasks-section">
             <h3>Tasks</h3>
@@ -168,15 +153,17 @@ const PersonalBook: React.FC = () => {
               <ul>
                 {tasks.map((task) => (
                   <li key={task._id}>
-                    <p>
-                      {task.description} - <strong>{task.status}</strong>
+                    <div>
+                      <p>
+                        {task.description} - <strong>{task.status}</strong>
+                      </p>
                       <button onClick={() => fetchCommentsForTask(task._id)}>
                         View Comments
                       </button>
                       <button onClick={() => setAddingCommentTaskId(task._id)}>
                         Add Comment
                       </button>
-                    </p>
+                    </div>
 
                     {loadingComments[task._id] ? (
                       <p>Loading comments...</p>
@@ -185,10 +172,10 @@ const PersonalBook: React.FC = () => {
                         {comments[task._id]?.length > 0 ? (
                           comments[task._id].map((comment) => (
                             <li key={comment._id}>
-                              <p>
-                                <strong>{comment.userId.username}:</strong>{" "}
-                                {comment.content}
-                              </p>
+                              <Comment
+                                content={comment.content}
+                                userId={comment.userId}
+                              />
                             </li>
                           ))
                         ) : (
@@ -220,8 +207,8 @@ const PersonalBook: React.FC = () => {
             )}
           </div>
         </section>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 };
 
