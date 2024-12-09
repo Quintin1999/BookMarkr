@@ -68,7 +68,7 @@ const HomePage: React.FC = () => {
             your reading journey, and jot down your thoughts at your own pace.
           </p>
 
-          <img src="../public/images/videoplaceholder.png" alt="Video" />
+          <img src="../public/images/personal-library.jpg" alt="Video" />
 
           <button className="section-button">Begin Your Library</button>
         </div>
@@ -82,7 +82,7 @@ const HomePage: React.FC = () => {
             together and engage in discussion.
           </p>
 
-          <img src="../public/images/videoplaceholder.png" alt="Video" />
+          <img src="../public/images/book-page.jpg" alt="Video" />
 
           <button className="section-button">Join a Book Club!</button>
         </div>
