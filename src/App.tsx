@@ -12,6 +12,7 @@ import PersonalBook from "./persbook/PersonalBook.tsx";
 import PersonalLibraryPage from "./perslib/PersonalLibrary.tsx";
 import ClubLibrary from "./clublib/ClubLibrary.tsx";
 import ClubBook from "./clubbook/ClubBook.tsx";
+import ClubsPage from "./clubs/ClubsPage.tsx";
 
 const App: React.FC = () => {
   return (
@@ -33,11 +34,14 @@ const App: React.FC = () => {
         {/*route for personal library page*/}
         <Route path="/personal-library" element={<PersonalLibraryPage />} />
 
+        {/*route for all your club landing page*/}
+        <Route path="/clubs" element={<ClubsPage/>}/>
+
         {/*route for club library*/}
         <Route path="/club-library/:clubId" element={<ClubLibrary />} />
 
         {/*route for club books*/}
-        <Route path="/club-book/:bookId" element={<ClubBook />} />
+        <Route path="/clubs/:clubId/books/:bookId" element={<ClubBook />} />
 
         {/* default page*/}
         <Route path="/" element={<HomePage />} />

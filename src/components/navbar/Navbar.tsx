@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
               <Link to="/personal-library" className="navbar-link">
                 Personal Library
               </Link>
-              <Link to="/book-clubs" className="navbar-link">
+              <Link to="/clubs" className="navbar-link">
                 Book Clubs
               </Link>
             </>

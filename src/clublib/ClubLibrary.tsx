@@ -74,7 +74,7 @@ const ClubLibrary: React.FC = () => {
   }, [clubId]);
 
   const handleBookClick = (bookId: string) => {
-    navigate(`/club-book/${bookId}`); // Navigate to ClubBook page with bookId
+    navigate(`/clubs/${clubId}/books/${bookId}`); // Navigate to ClubBook page with bookId
   };
 
   if (loading) {
