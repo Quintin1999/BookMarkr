@@ -27,9 +27,13 @@ const PersonalBook: React.FC = () => {
   const [book, setBook] = useState<Book | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [comments, setComments] = useState<{ [taskId: string]: Comment[] }>({});
-  const [loadingComments, setLoadingComments] = useState<{ [taskId: string]: boolean }>({});
+  const [loadingComments, setLoadingComments] = useState<{
+    [taskId: string]: boolean;
+  }>({});
   const [loading, setLoading] = useState(true);
-  const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(null);
+  const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(
+    null
+  );
   const [newCommentContent, setNewCommentContent] = useState<string>("");
 
   useEffect(() => {
@@ -38,19 +42,26 @@ const PersonalBook: React.FC = () => {
         const token = await getAuthToken();
 
         // Fetch book details
-        const bookResponse = await fetch(`http://localhost:3000/api/books/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const bookResponse = await fetch(
+          `http://localhost:3000/api/books/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!bookResponse.ok) throw new Error("Failed to fetch book details");
 
         const bookData = await bookResponse.json();
         setBook(bookData);
 
         // Fetch tasks for the specific book
-        const tasksResponse = await fetch(`http://localhost:3000/api/tasks/book/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!tasksResponse.ok) throw new Error("Failed to fetch tasks for this book");
+        const tasksResponse = await fetch(
+          `http://localhost:3000/api/tasks/book/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!tasksResponse.ok)
+          throw new Error("Failed to fetch tasks for this book");
 
         const tasksData: Task[] = await tasksResponse.json();
         setTasks(tasksData);
@@ -69,10 +80,14 @@ const PersonalBook: React.FC = () => {
       setLoadingComments((prev) => ({ ...prev, [taskId]: true }));
 
       const token = await getAuthToken();
-      const response = await fetch(`http://localhost:3000/api/tasks/${taskId}/comments`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error("Failed to fetch comments for the task");
+      const response = await fetch(
+        `http://localhost:3000/api/tasks/${taskId}/comments`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!response.ok)
+        throw new Error("Failed to fetch comments for the task");
 
       const taskComments: Comment[] = await response.json();
       setComments((prev) => ({ ...prev, [taskId]: taskComments }));
@@ -122,12 +137,8 @@ const PersonalBook: React.FC = () => {
             {book.thumbnail && <img src={book.thumbnail} alt={book.title} />}
           </div>
           <h2>{book.title}</h2>
-
-          <p>By: {book.author.join(", ")}</p>
-
-          <p>By: {book.author?.join(", ") || "Unknown Author"}</p>{" "}
+          <p>By: {book.author?.join(", ") || "Unknown Author"}</p>
           {/* Updated here */}
-          
           <p>Publication Year: {book.year}</p>
           {book.dateAdded ? (
             <p>Date Added: {new Date(book.dateAdded).toLocaleDateString()}</p>
@@ -159,8 +170,12 @@ const PersonalBook: React.FC = () => {
                   <li key={task._id}>
                     <p>
                       {task.description} - <strong>{task.status}</strong>
-                      <button onClick={() => fetchCommentsForTask(task._id)}>View Comments</button>
-                      <button onClick={() => setAddingCommentTaskId(task._id)}>Add Comment</button>
+                      <button onClick={() => fetchCommentsForTask(task._id)}>
+                        View Comments
+                      </button>
+                      <button onClick={() => setAddingCommentTaskId(task._id)}>
+                        Add Comment
+                      </button>
                     </p>
 
                     {loadingComments[task._id] ? (
@@ -171,7 +186,8 @@ const PersonalBook: React.FC = () => {
                           comments[task._id].map((comment) => (
                             <li key={comment._id}>
                               <p>
-                                <strong>{comment.userId.username}:</strong> {comment.content}
+                                <strong>{comment.userId.username}:</strong>{" "}
+                                {comment.content}
                               </p>
                             </li>
                           ))
@@ -179,7 +195,6 @@ const PersonalBook: React.FC = () => {
                           <p>No comments yet.</p>
                         )}
                       </ul>
-
                     )}
 
                     {addingCommentTaskId === task._id && (
@@ -189,8 +204,12 @@ const PersonalBook: React.FC = () => {
                           onChange={(e) => setNewCommentContent(e.target.value)}
                           placeholder="Enter your comment"
                         />
-                        <button onClick={() => addComment(task._id)}>Submit</button>
-                        <button onClick={() => setAddingCommentTaskId(null)}>Cancel</button>
+                        <button onClick={() => addComment(task._id)}>
+                          Submit
+                        </button>
+                        <button onClick={() => setAddingCommentTaskId(null)}>
+                          Cancel
+                        </button>
                       </div>
                     )}
                   </li>
