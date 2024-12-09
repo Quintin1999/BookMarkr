@@ -10,6 +10,8 @@ import HomePage from "./home/HomePage.tsx";
 import PersonalBook from "./persbook/PersonalBook.tsx";
 import PersonalLibraryPage from "./perslib/PersonalLibrary.tsx";
 import Debug from "./debug/Debug.tsx";
+import ClubLibrary from "./clublib/ClubLibrary.tsx";
+import ClubBook from "./clubbook/ClubBook.tsx";
 
 const App: React.FC = () => {
   return (
@@ -30,6 +32,12 @@ const App: React.FC = () => {
 
         {/*route for personal library page*/}
         <Route path="/personal-library" element={<PersonalLibraryPage />} />
+
+        {/*route for club library*/}
+        <Route path="/club-library/:clubId" element={<ClubLibrary/>}/>
+
+        {/*route for club books*/}
+        <Route path="/club-book/:bookId" element={<ClubBook/>}/>
 
         {/*route for debug page*/}
         <Route path="/debug" element={<Debug />} />
