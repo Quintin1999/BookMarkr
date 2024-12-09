@@ -43,20 +43,29 @@ const PersonalBook: React.FC = () => {
       setCurrentUserId(decodedToken.userId)
     }
   }
-    const fetchBookAndTasks = async () => {
+  const fetchBookAndTasks = async () => {
+    try {
+      // Fetch book data first
+      const bookData = await fetchWithAuth(`http://localhost:3000/api/books/${id}`);
+      setBook(bookData);
+      console.log("Book Data:", bookData); // Debugging log
+  
+      // Then fetch tasks, but allow failure without blocking the book render
       try {
-        const [bookData, tasksData] = await Promise.all([
-          fetchWithAuth(`http://localhost:3000/api/books/${id}`),
-          fetchWithAuth(`http://localhost:3000/api/tasks/book/${id}`),
-        ]);
-        setBook(bookData);
+        const tasksData = await fetchWithAuth(`http://localhost:3000/api/tasks/book/${id}`);
         setTasks(tasksData);
-      } catch (error) {
-        console.error("Error fetching book and tasks:", error);
-      } finally {
-        setLoading(false);
+        console.log("Tasks Data:", tasksData); // Debugging log
+      } catch (taskError) {
+        console.error("Error fetching tasks:", taskError);
+        setTasks([]); // Set tasks to an empty array on failure
       }
-    };
+    } catch (bookError) {
+      console.error("Error fetching book:", bookError);
+      setBook(null); // Ensure the book remains null if fetching fails
+    } finally {
+      setLoading(false);
+    }
+  };
     
     fetchCurrentUser();
     fetchBookAndTasks();

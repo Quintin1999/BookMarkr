@@ -41,7 +41,7 @@ const App: React.FC = () => {
         <Route path="/club-library/:clubId" element={<ClubLibrary />} />
 
         {/*route for club books*/}
-        <Route path="/club-book/:bookId" element={<ClubBook />} />
+        <Route path="/clubs/:clubId/books/:bookId" element={<ClubBook />} />
 
         {/* default page*/}
         <Route path="/" element={<HomePage />} />

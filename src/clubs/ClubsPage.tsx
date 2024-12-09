@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getAuthToken } from "../scripts";
 
 type Club = {
@@ -9,7 +10,7 @@ type Club = {
 };
 
 const ClubsPage: React.FC = () => {
-  const [clubs, setClubs] = useState<Club[]>([]); 
+  const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchClubs = async () => {
@@ -48,7 +49,12 @@ const ClubsPage: React.FC = () => {
         <ul>
           {clubs.map((club) => (
             <li key={club._id} style={{ marginBottom: "1rem" }}>
-              <h2>{club.name}</h2>
+              <h2>
+                {/* Link to the club library page */}
+                <Link to={`/club-library/${club._id}`} style={{ textDecoration: "none", color: "blue" }}>
+                  {club.name}
+                </Link>
+              </h2>
               <p><strong>Description:</strong> {club.description}</p>
               <p><strong>Role:</strong> {club.role}</p>
             </li>
