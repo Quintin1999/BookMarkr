@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getAuthToken } from "../scripts";
 import BookGrid from "../components/bookGrid/BookGrid";
-
+import { Book } from "../types/types";
 interface Club {
   _id: string;
   name: string;
@@ -14,13 +14,7 @@ interface Club {
   members: { _id: string; username: string }[];
 }
 
-interface Book {
-  _id: string;
-  title: string;
-  author: string;
-  year: number;
-  thumbnail: string;
-}
+
 
 const ClubLibrary: React.FC = () => {
   const { clubId } = useParams<{ clubId: string }>();

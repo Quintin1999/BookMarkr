@@ -4,18 +4,7 @@ import { useParams } from "react-router-dom";
 import { createTaskForPersonalBook } from "../scripts";
 import { getAuthToken } from "../scripts";
 
-interface Book {
-  _id: string;
-  title: string;
-  authors: string[];
-  year: number;
-  description: string;
-  thumbnail?: string;
-  dateAdded: string;
-}
-
 import { Book } from "../types/types";
-
 
 interface Task {
   _id: string;
@@ -134,7 +123,7 @@ const PersonalBook: React.FC = () => {
           </div>
           <h2>{book.title}</h2>
 
-          <p>By: {book.authors.join(", ")}</p>
+          <p>By: {book.author.join(", ")}</p>
 
           <p>By: {book.author?.join(", ") || "Unknown Author"}</p>{" "}
           {/* Updated here */}
