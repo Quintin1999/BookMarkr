@@ -13,6 +13,7 @@ export interface Task {
   _id: string;
   description: string;
   status: string;
+  createdBy:string;
 }
 
 export interface Comment {

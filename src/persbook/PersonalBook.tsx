@@ -4,8 +4,9 @@ import { useParams } from "react-router-dom";
 import { getAuthToken } from "../scripts";
 import { Book, Task, Comment as CommentType } from "../types/types";
 import Comment from "../components/comment/Comment";
-import TaskForm from "../components/taskForm/taskForm";
 import styles from "./personalBook.module.css";
+import TaskForm from "../components/taskForm/TaskForm";
+import { jwtDecode } from "jwt-decode";
 
 
 const PersonalBook: React.FC = () => {
@@ -14,12 +15,9 @@ const PersonalBook: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [comments, setComments] = useState<Record<string, CommentType[]>>({});
   const [loading, setLoading] = useState(true);
-  const [loadingComments, setLoadingComments] = useState<
-    Record<string, boolean>
-  >({});
-  const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(
-    null
-  );
+  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
+  const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(null);
+
   const [newCommentContent, setNewCommentContent] = useState<string>("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -53,7 +51,6 @@ const PersonalBook: React.FC = () => {
         ]);
         setBook(bookData);
         setTasks(tasksData);
-
       } catch (error) {
         console.error("Error fetching book and tasks:", error);
       } finally {
@@ -64,6 +61,16 @@ const PersonalBook: React.FC = () => {
     fetchCurrentUser();
     fetchBookAndTasks();
   }, [id]);
+
+  // Filter tasks by `currentUserId` when both tasks and currentUserId are available
+  const filteredTasks = React.useMemo(() => {
+    if (!currentUserId) return [];
+    return tasks.filter((task) => task.createdBy === currentUserId);
+  }, [tasks, currentUserId]);
+
+  useEffect(() => {
+    filteredTasks.forEach((task) => fetchCommentsForTask(task._id));
+  }, [filteredTasks]);
 
   const fetchCommentsForTask = async (taskId: string) => {
     try {
@@ -119,7 +126,6 @@ const PersonalBook: React.FC = () => {
           <p>By: {book.author?.join(", ") || "Unknown Author"}</p>
           <p>Publication Year: {book.year || "Unknown"}</p>
           {book.dateAdded && (
-
             <p>Date Added: {new Date(book.dateAdded).toLocaleDateString()}</p>
           )}
         </section>
@@ -131,14 +137,16 @@ const PersonalBook: React.FC = () => {
 
           <div className={styles.taskSection}>
             <h3>Tasks</h3>
-            {tasks.length > 0 ? (
+            {filteredTasks.length > 0 ? (
               <ul>
-                {tasks.map((task) => (
+                {filteredTasks.map((task) => (
                   <li key={task._id}>
                     <div className={styles.task}>
+
+
                       <p className={styles.taskDescription}>
                         {task.description}
-                      </p>{" "}
+                      </p>
                       <p className={styles.taskStatus}>{task.status}</p>
                       <button onClick={() => setAddingCommentTaskId(task._id)}>
                         Add Comment
