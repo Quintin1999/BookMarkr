@@ -26,33 +26,33 @@ const HomePage: React.FC = () => {
       <section className={`container`}>
         <div className={`${styles.bookGrid}`}>
           <BookCard
-            id="673bba82fcfb061b2ae19138"
+            _id="673bba82fcfb061b2ae19138"
             title="Book Title 1"
-            author="Author 1"
+            author={["Author 1"]}
             year={2024}
             thumbnail="/images/nobook.png"
             onAdd={() => addBookToPersonalLibrary("673bba82fcfb061b2ae19138")}
           />
           <BookCard
-            id="673bba82fcfb061b2ae19138"
+            _id="673bba82fcfb061b2ae19138"
             title="Book Title 2"
-            author="Author 2"
+            author={["Author 2"]}
             year={2023}
             thumbnail="/images/nobook.png"
             onAdd={() => alert("Added Book 2")}
           />
           <BookCard
-            id="673bba82fcfb061b2ae19138"
+            _id="673bba82fcfb061b2ae19138"
             title="Book Title 3"
-            author="Author 3"
+            author={["Author 3"]}
             year={2025}
             thumbnail="/images/nobook.png"
             onAdd={() => alert("Added Book 3")}
           />
           <BookCard
-            id="673bba82fcfb061b2ae19138"
+            _id="673bba82fcfb061b2ae19138"
             title="Book Title 4"
-            author="Author 4"
+            author={["Author 4"]}
             year={2022}
             thumbnail="/images/nobook.png"
             onAdd={() => alert("Added Book 4")}

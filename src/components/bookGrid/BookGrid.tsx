@@ -13,7 +13,7 @@ const BookGrid: React.FC<BookGridProps> = ({ books, onAdd }) => {
       {books.map((book) => (
         <BookCard
           key={book._id}
-          id={book._id} // Pass the book ID
+          _id={book._id} // Pass the book ID
           title={book.title}
           author={book.author}
           year={book.year}
