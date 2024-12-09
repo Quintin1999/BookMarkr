@@ -1,6 +1,6 @@
 const apiUrl: string = "http://localhost:3000/api"; // Base API URL
 import { FormEvent } from "react";
-import { BookCardProps } from "./components/bookCard/BookCard";
+import { Book } from "./types/types.ts";
 import { jwtDecode } from "jwt-decode";
 
 // Function to get the JWT token
@@ -12,7 +12,7 @@ export async function getAuthToken(): Promise<string> {
   }
   return token;
 }
-export const getUserId =():string|null=>{
+export const getUserId = (): string | null => {
   const token = localStorage.getItem("jwtToken"); // Retrieve the token from local storage
   if (!token) {
     console.error("No token found in local storage.");
@@ -28,89 +28,6 @@ export const getUserId =():string|null=>{
     return null;
   }
 };
-// Function to handle login form submission
-export async function submitLoginForm(event: FormEvent<HTMLFormElement>): Promise<void> {
-  event.preventDefault(); // Prevent the default form submission behavior
-
-  // Access DOM elements and cast them to HTMLInputElement
-  const emailInput = document.getElementById("loginEmail") as HTMLInputElement;
-  const passwordInput = document.getElementById("loginPassword") as HTMLInputElement;
-
-  // Ensure inputs are valid before proceeding
-  if (!emailInput || !passwordInput) {
-    console.error("Form inputs not found");
-    alert("Form inputs are missing.");
-    return;
-  }
-
-  const email: string = emailInput.value;
-  const password: string = passwordInput.value;
-
-  try {
-    const response = await fetch("http://localhost:3000/api/users/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const result: { token?: string; message?: string } = await response.json();
-
-    if (response.ok && result.token) {
-      localStorage.setItem("jwtToken", result.token); // Store the token
-      alert("Login successful");
-      console.log("Login Successful");
-    } else {
-      alert("Login failed: " + (result.message || "Unknown error"));
-      console.log("Login Unsuccessful");
-    }
-  } catch (error) {
-    console.error("Error during login:", error);
-    alert("Error during login");
-  }
-}
-
-//function to handle signup form submission
-export async function submitSignupForm(event: FormEvent<HTMLFormElement>): Promise<void> {
-  event.preventDefault(); // Prevent the default form submission
-
-  // Get input elements and their values
-  const usernameInput = document.getElementById("username") as HTMLInputElement;
-  const emailInput = document.getElementById("email") as HTMLInputElement;
-  const passwordInput = document.getElementById("password") as HTMLInputElement;
-
-  // Ensure inputs are valid before proceeding
-  if (!usernameInput || !emailInput || !passwordInput) {
-    console.error("Form inputs not found");
-    alert("Please fill out all required fields.");
-    return;
-  }
-
-  const username: string = usernameInput.value;
-  const email: string = emailInput.value;
-  const password: string = passwordInput.value;
-
-  try {
-    // Send a POST request to create the user
-    const response = await fetch(`${apiUrl}/users/create`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
-    });
-
-    const result: { success?: boolean; message?: string } = await response.json();
-
-    if (response.ok) {
-      alert("User created successfully!");
-      console.log("Signup successful:", result);
-    } else {
-      alert("Signup failed: " + (result.message || "Unknown error"));
-      console.error("Signup failed:", result);
-    }
-  } catch (error) {
-    console.error("Error during signup:", error);
-    alert("Error during signup");
-  }
-}
 
 //google books json foramt
 interface GoogleBooksResponse {
@@ -127,9 +44,8 @@ interface GoogleBooksResponse {
   }[];
 }
 
-
 // Function to search Google Books and handle UI updates
-export async function searchBooks(query: string): Promise<BookCardProps[]> {
+export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) {
     alert("Please enter a search term.");
     return [];
@@ -137,7 +53,9 @@ export async function searchBooks(query: string): Promise<BookCardProps[]> {
 
   try {
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
+        query
+      )}`
     );
 
     const data: GoogleBooksResponse = await response.json();
@@ -145,16 +63,17 @@ export async function searchBooks(query: string): Promise<BookCardProps[]> {
     if (data.items && data.items.length > 0) {
       // Map raw API data to BookCardProps
       return data.items.map((book) => {
-        const id=book.id;
+        const _id = book.id;
         const title = book.volumeInfo.title || "Unknown Title";
-        const author = book.volumeInfo.authors?.join(", ") || "Unknown Author";
+        const author = book.volumeInfo.authors || ["Unknown Author"];
         const year = book.volumeInfo.publishedDate
           ? new Date(book.volumeInfo.publishedDate).getFullYear()
           : 1970; // Default year if none provided
-        const thumbnail = book.volumeInfo.imageLinks?.thumbnail || "/public/images/nobook.png";
+        const thumbnail =
+          book.volumeInfo.imageLinks?.thumbnail || "/public/images/nobook.png";
 
         return {
-          id,
+          _id,
           title,
           author,
           year,
@@ -172,9 +91,6 @@ export async function searchBooks(query: string): Promise<BookCardProps[]> {
     return [];
   }
 }
-
-
-
 
 interface ApiResponse {
   success?: boolean;
@@ -222,13 +138,8 @@ export async function addBookToPersonalLibrary(bookId: string): Promise<void> {
   }
 }
 
-async function addBookToClubLibrary(bookId:string, clubId:string) {
-  console.log(
-    "Adding to club library. Book ID:",
-    bookId,
-    "Club ID:",
-    clubId
-  );
+async function addBookToClubLibrary(bookId: string, clubId: string) {
+  console.log("Adding to club library. Book ID:", bookId, "Club ID:", clubId);
 
   const token = getAuthToken();
   if (!token) {
@@ -264,13 +175,13 @@ async function addBookToClubLibrary(bookId:string, clubId:string) {
   }
 }
 
-interface Club{
-  _id:string;
-  name:string;
-  role:string; //owner, member, etc.
+interface Club {
+  _id: string;
+  name: string;
+  role: string; //owner, member, etc.
 }
 
-export async function selectClub(): Promise<string|null> {
+export async function selectClub(): Promise<string | null> {
   const token = getAuthToken();
   if (!token) {
     alert("You must be logged in to view your clubs.");
@@ -279,20 +190,15 @@ export async function selectClub(): Promise<string|null> {
 
   console.log("Fetching clubs for user"); // Debugging
   try {
-    const response = await fetch(
-      "http://localhost:3000/api/club/my-clubs",
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const response = await fetch("http://localhost:3000/api/club/my-clubs", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     if (!response.ok) {
       const result: { message?: string } = await response.json();
       console.error("Error response from API:", result);
-      alert(
-        "Error fetching clubs: " + (result.message || "Unknown error")
-      );
+      alert("Error fetching clubs: " + (result.message || "Unknown error"));
       return null;
     }
 
@@ -356,8 +262,9 @@ export async function selectClub(): Promise<string|null> {
   }
 }
 
-
-export async function createTaskForPersonalBook(event: FormEvent): Promise<void> {
+export async function createTaskForPersonalBook(
+  event: FormEvent
+): Promise<void> {
   event.preventDefault();
 
   try {
@@ -369,8 +276,12 @@ export async function createTaskForPersonalBook(event: FormEvent): Promise<void>
     }
 
     // Retrieve form values
-    const bookId = (document.getElementById("personalBookSelect") as HTMLSelectElement)?.value;
-    const description = (document.getElementById("personalTaskDescription") as HTMLInputElement)?.value;
+    const bookId = (
+      document.getElementById("personalBookSelect") as HTMLSelectElement
+    )?.value;
+    const description = (
+      document.getElementById("personalTaskDescription") as HTMLInputElement
+    )?.value;
 
     if (!bookId || !description.trim()) {
       alert("Book ID and description are required.");
@@ -391,7 +302,9 @@ export async function createTaskForPersonalBook(event: FormEvent): Promise<void>
 
     if (response.ok) {
       alert("Task created successfully!");
-      (document.getElementById("personalTaskDescription") as HTMLInputElement).value = ""; // Clear the form
+      (
+        document.getElementById("personalTaskDescription") as HTMLInputElement
+      ).value = ""; // Clear the form
     } else {
       console.error("Error creating task:", result.message);
       alert(`Error: ${result.message}`);

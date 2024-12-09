@@ -35,26 +35,16 @@ const App: React.FC = () => {
         <Route path="/personal-library" element={<PersonalLibraryPage />} />
 
         {/*route for club library*/}
-        <Route path="/club-library/:clubId" element={<ClubLibrary/>}/>
+        <Route path="/club-library/:clubId" element={<ClubLibrary />} />
 
         {/*route for club books*/}
-        <Route path="/club-book/:bookId" element={<ClubBook/>}/>
+        <Route path="/club-book/:bookId" element={<ClubBook />} />
 
         {/*route for debug page*/}
         <Route path="/debug" element={<Debug />} />
 
         {/* default page*/}
-        <Route
-          path="/"
-          element={
-            <div>
-              <h1>Home Page</h1>
-              <p>
-                Go to <a href="/login">Login</a> or <a href="/signup">Signup</a>
-              </p>
-            </div>
-          }
-        />
+        <Route path="/" element={<HomePage />} />
       </Routes>
       <Footer />
     </>
