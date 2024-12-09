@@ -1,13 +1,6 @@
 import React from "react";
 import BookCard from "../bookCard/BookCard";
-
-interface Book {
-  _id: string;
-  title: string;
-  author: string;
-  year: number;
-  thumbnail: string; // Include the thumbnail field
-}
+import { Book } from "../../types/types";
 
 interface BookGridProps {
   books: Book[];
@@ -20,7 +13,7 @@ const BookGrid: React.FC<BookGridProps> = ({ books, onAdd }) => {
       {books.map((book) => (
         <BookCard
           key={book._id}
-          id={book._id} // Pass the book ID
+          _id={book._id} // Pass the book ID
           title={book.title}
           author={book.author}
           year={book.year}

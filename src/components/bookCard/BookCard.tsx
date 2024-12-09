@@ -1,33 +1,36 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import styles from "./bookCard.module.css";
+import { Book } from "../../types/types";
 
-export interface BookCardProps {
-  id: string; // Add the book ID for navigation
-  title: string;
-  author: string;
-  year: number;
-  thumbnail: string; // Add thumbnail to props
-  onAdd: () => void; // Triggered when "+" button is clicked
-}
-
-const BookCard: React.FC<BookCardProps> = ({ id, title, author, year, thumbnail, onAdd }) => {
+const BookCard: React.FC<Book> = ({
+  _id,
+  title,
+  author,
+  year,
+  thumbnail,
+  onAdd,
+}) => {
   return (
-    <div className="book-card">
-      <Link to={`/books/${id}`} className="book-card-link">
-      
-        <div className="book-cover">
-          <img src={thumbnail} alt={title} className="book-thumbnail" /> {/* Display thumbnail */}
-        </div>
-        <div className="book-info">
-          <h3 className="book-title">{title}</h3>
-          <p className="book-author">{author}</p>
-          <p className="book-year">{year}</p>
-        </div>
-      </Link>
-      <button className="add-button" onClick={onAdd}>
-        +
-      </button>
-    </div>
+    <figure className={styles.bookCard}>
+      <div className={styles.bookImage}>
+        <Link to={`/books/${_id}`}>
+          <img src={thumbnail} alt={title} />
+        </Link>
+
+        <button className={styles.addBook} onClick={onAdd}>
+          <span className={styles.addBookText}>Add Book</span> +
+        </button>
+      </div>
+
+      <figcaption className={styles.bookDetails}>
+        <p className={styles.bookTitle}>{title}</p>
+        <p className={styles.bookAuthor}>
+          {author?.join(", ") || "Unknown Author"}
+        </p>
+        <p className={styles.bookYear}>{year}</p>
+      </figcaption>
+    </figure>
   );
 };
 

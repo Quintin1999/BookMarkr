@@ -1,0 +1,12 @@
+.libraryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: min-content;
+  min-height: calc(100vh - 72px - 48px);
+  gap: 1rem 2rem;
+}
+
+.libraryGrid h1 {
+  grid-column: 1 / 5;
+  margin-top: 1.5rem;
+}
