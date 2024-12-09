@@ -7,6 +7,7 @@ import Comment from "../components/comment/Comment";
 import TaskForm from "../components/taskForm/taskForm";
 import styles from "./personalBook.module.css";
 
+
 const PersonalBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
@@ -20,6 +21,7 @@ const PersonalBook: React.FC = () => {
     null
   );
   const [newCommentContent, setNewCommentContent] = useState<string>("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const token = await getAuthToken();
@@ -36,6 +38,13 @@ const PersonalBook: React.FC = () => {
   };
 
   useEffect(() => {
+    const fetchCurrentUser=async()=>{
+    const token= await getAuthToken();
+    if(token){
+      const decodedToken:{userId:string}=jwtDecode(token);
+      setCurrentUserId(decodedToken.userId)
+    }
+  }
     const fetchBookAndTasks = async () => {
       try {
         const [bookData, tasksData] = await Promise.all([
@@ -44,13 +53,15 @@ const PersonalBook: React.FC = () => {
         ]);
         setBook(bookData);
         setTasks(tasksData);
+
       } catch (error) {
         console.error("Error fetching book and tasks:", error);
       } finally {
         setLoading(false);
       }
     };
-
+    
+    fetchCurrentUser();
     fetchBookAndTasks();
   }, [id]);
 
@@ -108,6 +119,7 @@ const PersonalBook: React.FC = () => {
           <p>By: {book.author?.join(", ") || "Unknown Author"}</p>
           <p>Publication Year: {book.year || "Unknown"}</p>
           {book.dateAdded && (
+
             <p>Date Added: {new Date(book.dateAdded).toLocaleDateString()}</p>
           )}
         </section>
