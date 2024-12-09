@@ -1,7 +1,12 @@
 import { useState, FormEvent } from "react";
 import styles from "./taskForm.module.css";
 
-const TaskForm = ({ bookId }: { bookId: string }) => {
+interface TaskFormProps {
+  bookId: string;
+  onTaskAdded: () => void; // Callback to notify parent when a task is added
+}
+
+const TaskForm = ({ bookId, onTaskAdded }: TaskFormProps) => {
   const [description, setDescription] = useState<string>("");
 
   async function createTaskForPersonalBook(event: FormEvent): Promise<void> {
@@ -35,6 +40,7 @@ const TaskForm = ({ bookId }: { bookId: string }) => {
       if (response.ok) {
         alert("Task created successfully!");
         setDescription(""); // Clear the form
+        onTaskAdded(); // Notify parent of the new task
       } else {
         console.error("Error creating task:", result.message);
         alert(`Error: ${result.message}`);
@@ -51,14 +57,7 @@ const TaskForm = ({ bookId }: { bookId: string }) => {
       <input
         id="personalTaskDescription"
         value={description}
-        onChange={(e) => {
-          const value = e.target.value;
-          if (value.trim() !== "") {
-            setDescription(value);
-          } else {
-            setDescription("");
-          }
-        }}
+        onChange={(e) => setDescription(e.target.value)}
         placeholder="Enter Task Name"
         required
       />
