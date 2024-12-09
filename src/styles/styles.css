@@ -22,6 +22,13 @@ figcaption {
   color: var(--primary-900);
 }
 
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
 h1 {
   font-size: 2rem;
   line-height: 130%;
@@ -40,6 +47,7 @@ h3 {
 p {
   font-size: 1rem;
   line-height: 150%;
+  text-wrap: pretty;
 }
 
 .text-xl {

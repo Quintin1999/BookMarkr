@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from "react";
 import BookGrid from "../components/bookGrid/BookGrid";
-
-interface Book {
-  _id: string;
-  title: string;
-  author: string;
-  year: number;
-  thumbnail: string;
-}
+import styles from "./personalLibrary.module.css";
+import { Book } from "../types/types";
 
 const PersonalLibraryPage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -21,19 +15,22 @@ const PersonalLibraryPage: React.FC = () => {
       }
 
       try {
-        const response = await fetch("http://localhost:3000/api/users/library", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "http://localhost:3000/api/users/library",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch personal library");
         }
 
         const data: Book[] = await response.json();
-        console.log("Fetched Books:",data)//debugging
+        console.log("Fetched Books:", data); //debugging
         setBooks(data);
       } catch (error) {
         console.error("Error fetching personal library:", error);
@@ -48,14 +45,16 @@ const PersonalLibraryPage: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>My Personal Library</h1>
-      {books.length > 0 ? (
-        <BookGrid books={books} onAdd={handleAddBook} />
-      ) : (
-        <p>You should add books!</p>
-      )}
-    </div>
+    <main className="container">
+      <div className={`${styles.libraryGrid}`}>
+        <h1>My Personal Library</h1>
+        {books.length > 0 ? (
+          <BookGrid books={books} onAdd={handleAddBook} />
+        ) : (
+          <p>You should add books!</p>
+        )}
+      </div>
+    </main>
   );
 };
 
