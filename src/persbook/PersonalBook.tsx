@@ -44,10 +44,14 @@ const PersonalBook: React.FC = () => {
             {book.thumbnail && <img src={book.thumbnail} alt={book.title} />}
           </div>
           <h2>{book.title}</h2>
-          <p>By: {book.authors?.join(", ") || "Unknown Author"}</p>{" "}
+          <p>By: {book.author?.join(", ") || "Unknown Author"}</p>{" "}
           {/* Updated here */}
           <p>Publication Year: {book.year}</p>
-          <p>Date Added: {new Date(book.dateAdded).toLocaleDateString()}</p>
+          {book.dateAdded ? (
+            <p>Date Added: {new Date(book.dateAdded).toLocaleDateString()}</p>
+          ) : (
+            <></>
+          )}
         </section>
 
         {/* Right Column */}
