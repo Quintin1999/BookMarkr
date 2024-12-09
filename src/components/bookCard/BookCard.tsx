@@ -5,7 +5,7 @@ import styles from "./bookCard.module.css";
 export interface BookCardProps {
   id: string; // Add the book ID for navigation
   title: string;
-  author: string;
+  author: string[];
   year: number;
   thumbnail: string; // Add thumbnail to props
   onAdd: () => void; // Triggered when "+" button is clicked
@@ -33,7 +33,9 @@ const BookCard: React.FC<BookCardProps> = ({
 
       <figcaption className={styles.bookDetails}>
         <h3 className={styles.bookTitle}>{title}</h3>
-        <p className={styles.bookAuthor}>{author}</p>
+        <p className={styles.bookAuthor}>
+          {author?.join(", ") || "Unknown Author"}
+        </p>
         <p className={styles.bookYear}>{year}</p>
       </figcaption>
     </figure>

@@ -4,7 +4,7 @@ import BookCard from "../bookCard/BookCard";
 interface Book {
   _id: string;
   title: string;
-  author: string;
+  author: string[];
   year: number;
   thumbnail: string; // Include the thumbnail field
 }
