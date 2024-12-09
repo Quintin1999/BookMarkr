@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import BookGrid from "../components/bookGrid/BookGrid";
 import styles from "./personalLibrary.module.css";
 import { Book } from "../types/types";
+import { addBookToPersonalLibrary } from "../scripts";
 
 const PersonalLibraryPage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]); // User's personal library
@@ -104,7 +105,7 @@ const PersonalLibraryPage: React.FC = () => {
           {searchResults.length > 0 ? (
             <BookGrid
               books={searchResults}
-              onAdd={(bookId) => console.log(`Add book from search: ${bookId}`)}
+              onAdd={(bookId) => addBookToPersonalLibrary(bookId)}
             />
           ) : (
             !loadingSearch && <p>No books found. Try another query!</p>
