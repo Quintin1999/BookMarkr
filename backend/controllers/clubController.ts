@@ -99,25 +99,27 @@ export const leaveClub = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const getClubDetails = async (req: Request, res: Response): Promise<void> => {
-    const { clubId } = req.params;
-
+    const { clubId } = req.params; // Extract clubId from the request URL
+    console.log("Received clubId:", clubId);
+  
     try {
-        const club = await Club.findById(clubId)
-            .populate('owner', 'name') 
-            .populate('members', 'name'); 
-
-        if (!club) {
-            res.status(404).json({ message: 'Club not found' });
-            return;
-        }
-
-        res.status(200).json(club);
-    } catch (error: unknown) {
-        res.status(500).json({ error: error instanceof Error ? error.message : 'Error fetching club details' });
+      // Fetch the club details using the clubId
+      const club = await Club.findById(clubId).populate("owner members");
+      if (!club) {
+        console.error("No club found for ID:", clubId);
+        res.status(404).json({ message: "Club not found" }); // No explicit return needed
+        return; // Ends the execution
+      }
+  
+      console.log("Club details fetched:", club); // Log the retrieved club
+      res.status(200).json(club); // No explicit return needed
+    } catch (error) {
+      console.error("Error fetching club details:", error);
+      res.status(500).json({ message: "Error fetching club details" }); // No explicit return needed
     }
-};
+  };
 
-export const addBookToClubLibrary = async (req: Request, res: Response): Promise<void> => {
+  export const addBookToClubLibrary = async (req: Request, res: Response): Promise<void> => {
     const { clubId } = req.params;
     const { bookId } = req.body;
 
