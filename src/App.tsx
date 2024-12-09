@@ -39,9 +39,6 @@ const App: React.FC = () => {
         {/*route for club books*/}
         <Route path="/club-book/:bookId" element={<ClubBook />} />
 
-        {/*route for debug page*/}
-        <Route path="/debug" element={<Debug />} />
-
         {/* default page*/}
         <Route path="/" element={<HomePage />} />
       </Routes>
