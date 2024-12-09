@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
 import BookGrid from "../components/bookGrid/BookGrid";
 import styles from "./personalLibrary.module.css";
-
-interface Book {
-  _id: string;
-  title: string;
-  author: string;
-  year: number;
-  thumbnail: string;
-}
+import { Book } from "../types/types";
 
 const PersonalLibraryPage: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);

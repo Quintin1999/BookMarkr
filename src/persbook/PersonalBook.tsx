@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-interface Book {
-  _id: string;
-  title: string;
-  authors: string[]; // Note: updated to match the correct field name
-  year: number;
-  description: string;
-  thumbnail?: string;
-  dateAdded: string;
-}
+import { Book } from "../types/types";
 
 const PersonalBook: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Get the book ID from the URL
@@ -53,7 +44,8 @@ const PersonalBook: React.FC = () => {
             {book.thumbnail && <img src={book.thumbnail} alt={book.title} />}
           </div>
           <h2>{book.title}</h2>
-          <p>By: {book.authors?.join(", ") || "Unknown Author"}</p> {/* Updated here */}
+          <p>By: {book.authors?.join(", ") || "Unknown Author"}</p>{" "}
+          {/* Updated here */}
           <p>Publication Year: {book.year}</p>
           <p>Date Added: {new Date(book.dateAdded).toLocaleDateString()}</p>
         </section>

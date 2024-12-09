@@ -1,13 +1,6 @@
 import React from "react";
 import BookCard from "../bookCard/BookCard";
-
-interface Book {
-  _id: string;
-  title: string;
-  author: string[];
-  year: number;
-  thumbnail: string; // Include the thumbnail field
-}
+import { Book } from "../../types/types";
 
 interface BookGridProps {
   books: Book[];

@@ -1,18 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styles from "./bookCard.module.css";
+import { Book } from "../../types/types";
 
-export interface BookCardProps {
-  id: string; // Add the book ID for navigation
-  title: string;
-  author: string[];
-  year: number;
-  thumbnail: string; // Add thumbnail to props
-  onAdd: () => void; // Triggered when "+" button is clicked
-}
-
-const BookCard: React.FC<BookCardProps> = ({
-  id,
+const BookCard: React.FC<Book> = ({
+  _id,
   title,
   author,
   year,
@@ -22,7 +14,7 @@ const BookCard: React.FC<BookCardProps> = ({
   return (
     <figure className={styles.bookCard}>
       <div className={styles.bookImage}>
-        <Link to={`/books/${id}`}>
+        <Link to={`/books/${_id}`}>
           <img src={thumbnail} alt={title} />
         </Link>
 
@@ -32,7 +24,7 @@ const BookCard: React.FC<BookCardProps> = ({
       </div>
 
       <figcaption className={styles.bookDetails}>
-        <h3 className={styles.bookTitle}>{title}</h3>
+        <p className={styles.bookTitle}>{title}</p>
         <p className={styles.bookAuthor}>
           {author?.join(", ") || "Unknown Author"}
         </p>
