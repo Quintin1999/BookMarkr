@@ -7,6 +7,7 @@ import {
     getUserTasks,
     updateTask,
     deleteTask,
+    getCommentsForTask
 } from '../controllers/taskController';
 import { authenticate } from '../middleware/authMiddleware';
 
@@ -21,5 +22,7 @@ router.get('/user', authenticate, getUserTasks);
 router.put('/:taskId', authenticate, updateTask);  
     
 router.delete('/:taskId', authenticate, deleteTask);    
+
+router.get('/:taskId/comments',authenticate, getCommentsForTask)
 
 export default router;
