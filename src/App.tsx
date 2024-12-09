@@ -4,6 +4,7 @@ import LoginPage from "./login/LoginPage.tsx";
 import SignupPage from "./signup/SignupPage.tsx";
 import "./styles/styles.css";
 import "./styles/styles.colors.css";
+import "./styles/styles.components.css";
 import Navbar from "./components/navbar/Navbar.tsx";
 import Footer from "./components/footer/Footer.tsx";
 import HomePage from "./home/HomePage.tsx";

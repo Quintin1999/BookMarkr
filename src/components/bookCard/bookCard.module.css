@@ -1,0 +1,59 @@
+.bookCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bookImage {
+  position: relative;
+  height: 350px;
+}
+
+.bookImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bookImage button {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background-color: var(--primary-800);
+
+  padding: 8px 16px;
+  border-radius: 100px;
+}
+
+.addBookText {
+  display: none;
+}
+
+.bookImage button:hover {
+  background-color: var(--secondary);
+
+  .addBookText {
+    display: inline-block;
+  }
+}
+
+.bookDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.bookDetails .bookTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  line-height: 120%;
+  grid-column: 1 / 3;
+}
+
+.bookAuthor,
+.bookYear {
+  font-size: 1.125rem;
+}
+
+.bookYear {
+  text-align: right;
+}

@@ -36,3 +36,14 @@
   width: 48px;
   height: 48px;
 }
+
+.user {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.user img {
+  height: 32px;
+  width: 32px;
+}
