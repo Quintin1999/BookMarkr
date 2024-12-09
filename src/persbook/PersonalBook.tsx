@@ -4,13 +4,9 @@ import { useParams } from "react-router-dom";
 import { getAuthToken } from "../scripts";
 import { Book, Task, Comment as CommentType } from "../types/types";
 import Comment from "../components/comment/Comment";
-<<<<<<< HEAD
 import styles from "./personalBook.module.css";
 import TaskForm from "../components/taskForm/TaskForm";
-=======
-import TaskForm from "../components/taskForm/taskForm";
-import styles from "./personalBook.module.css";
->>>>>>> 5c2d6403f485428ee2939aee24b7f8ec5e285ca5
+import { jwtDecode } from "jwt-decode";
 
 const PersonalBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,13 +14,10 @@ const PersonalBook: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [comments, setComments] = useState<Record<string, CommentType[]>>({});
   const [loading, setLoading] = useState(true);
-  const [loadingComments, setLoadingComments] = useState<
-    Record<string, boolean>
-  >({});
-  const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(
-    null
-  );
+  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
+  const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(null);
   const [newCommentContent, setNewCommentContent] = useState<string>("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const token = await getAuthToken();
@@ -43,14 +36,41 @@ const PersonalBook: React.FC = () => {
   useEffect(() => {
     const fetchBookAndTasks = async () => {
       try {
-        const [bookData, tasksData] = await Promise.all([
-          fetchWithAuth(`http://localhost:3000/api/books/${id}`),
-          fetchWithAuth(`http://localhost:3000/api/tasks/book/${id}`),
-        ]);
+        const token = await getAuthToken();
+        if (token) {
+          try {
+            const decodedToken: { id: string } = jwtDecode(token);
+            setCurrentUserId(decodedToken.id); // Correctly set user ID
+            console.log("Decoded user ID:", decodedToken.id);
+          } catch (error) {
+            console.error("Error decoding token:", error);
+          }
+        } else {
+          console.error("No token found");
+        }
+
+        // Fetch book details
+        const bookResponse = await fetch(`http://localhost:3000/api/books/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!bookResponse.ok) throw new Error("Failed to fetch book details");
+
+        const bookData = await bookResponse.json();
         setBook(bookData);
-        setTasks(tasksData);
+
+        // Fetch tasks for the specific book
+        const tasksResponse = await fetch(
+          `http://localhost:3000/api/tasks/book/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!tasksResponse.ok) throw new Error("Failed to fetch tasks for this book");
+
+        const tasksData: Task[] = await tasksResponse.json();
+        setTasks(tasksData); // Set all tasks initially
       } catch (error) {
-        console.error("Error fetching book and tasks:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -58,6 +78,16 @@ const PersonalBook: React.FC = () => {
 
     fetchBookAndTasks();
   }, [id]);
+
+  // Filter tasks by `currentUserId` when both tasks and currentUserId are available
+  const filteredTasks = React.useMemo(() => {
+    if (!currentUserId) return [];
+    return tasks.filter((task) => task.createdBy === currentUserId);
+  }, [tasks, currentUserId]);
+
+  useEffect(() => {
+    filteredTasks.forEach((task) => fetchCommentsForTask(task._id));
+  }, [filteredTasks]);
 
   const fetchCommentsForTask = async (taskId: string) => {
     try {
@@ -72,10 +102,6 @@ const PersonalBook: React.FC = () => {
       setLoadingComments((prev) => ({ ...prev, [taskId]: false }));
     }
   };
-
-  useEffect(() => {
-    tasks.forEach((task) => fetchCommentsForTask(task._id));
-  }, [tasks]);
 
   const addComment = async (taskId: string) => {
     try {
@@ -124,9 +150,9 @@ const PersonalBook: React.FC = () => {
 
           <div className={styles.taskSection}>
             <h3>Tasks</h3>
-            {tasks.length > 0 ? (
+            {filteredTasks.length > 0 ? (
               <ul>
-                {tasks.map((task) => (
+                {filteredTasks.map((task) => (
                   <li key={task._id}>
                     <div className={styles.task}>
                       <p>
