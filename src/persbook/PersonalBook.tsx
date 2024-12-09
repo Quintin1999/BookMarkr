@@ -2,59 +2,50 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { getAuthToken } from "../scripts";
-
 import { Book, Task, Comment as CommentType } from "../types/types";
 import Comment from "../components/comment/Comment";
-import styles from "./personalBook.module.css";
 import TaskForm from "../components/taskForm/taskForm";
+import styles from "./personalBook.module.css";
 
 const PersonalBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [comments, setComments] = useState<{ [taskId: string]: CommentType[] }>(
-    {}
-  );
-  const [loadingComments, setLoadingComments] = useState<{
-    [taskId: string]: boolean;
-  }>({});
+  const [comments, setComments] = useState<Record<string, CommentType[]>>({});
   const [loading, setLoading] = useState(true);
+  const [loadingComments, setLoadingComments] = useState<
+    Record<string, boolean>
+  >({});
   const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(
     null
   );
   const [newCommentContent, setNewCommentContent] = useState<string>("");
 
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    const token = await getAuthToken();
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) throw new Error(`Failed to fetch: ${url}`);
+    return response.json();
+  };
+
   useEffect(() => {
     const fetchBookAndTasks = async () => {
       try {
-        const token = await getAuthToken();
-
-        // Fetch book details
-        const bookResponse = await fetch(
-          `http://localhost:3000/api/books/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        if (!bookResponse.ok) throw new Error("Failed to fetch book details");
-
-        const bookData = await bookResponse.json();
+        const [bookData, tasksData] = await Promise.all([
+          fetchWithAuth(`http://localhost:3000/api/books/${id}`),
+          fetchWithAuth(`http://localhost:3000/api/tasks/book/${id}`),
+        ]);
         setBook(bookData);
-
-        // Fetch tasks for the specific book
-        const tasksResponse = await fetch(
-          `http://localhost:3000/api/tasks/book/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        if (!tasksResponse.ok)
-          throw new Error("Failed to fetch tasks for this book");
-
-        const tasksData: Task[] = await tasksResponse.json();
         setTasks(tasksData);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching book and tasks:", error);
       } finally {
         setLoading(false);
       }
@@ -66,49 +57,34 @@ const PersonalBook: React.FC = () => {
   const fetchCommentsForTask = async (taskId: string) => {
     try {
       setLoadingComments((prev) => ({ ...prev, [taskId]: true }));
-
-      const token = await getAuthToken();
-      const response = await fetch(
-        `http://localhost:3000/api/tasks/${taskId}/comments`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const taskComments = await fetchWithAuth(
+        `http://localhost:3000/api/tasks/${taskId}/comments`
       );
-      if (!response.ok)
-        throw new Error("Failed to fetch comments for the task");
-
-      const taskComments: CommentType[] = await response.json();
       setComments((prev) => ({ ...prev, [taskId]: taskComments }));
     } catch (error) {
-      console.error("Error fetching comments for task:", error);
+      console.error(`Error fetching comments for task ${taskId}:`, error);
     } finally {
       setLoadingComments((prev) => ({ ...prev, [taskId]: false }));
     }
   };
 
+  useEffect(() => {
+    tasks.forEach((task) => fetchCommentsForTask(task._id));
+  }, [tasks]);
+
   const addComment = async (taskId: string) => {
     try {
-      const token = await getAuthToken();
-
-      const response = await fetch(`http://localhost:3000/api/comments/`, {
+      await fetchWithAuth(`http://localhost:3000/api/comments/`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           taskId,
           bookId: book?._id,
           content: newCommentContent,
         }),
       });
-      if (!response.ok) throw new Error("Failed to add comment");
-
-      // Re-fetch comments for the task
-      await fetchCommentsForTask(taskId);
-
-      setAddingCommentTaskId(null);
       setNewCommentContent("");
+      setAddingCommentTaskId(null);
+      fetchCommentsForTask(taskId); // Refresh comments for the task
     } catch (error) {
       console.error("Error adding comment:", error);
     }
@@ -130,34 +106,27 @@ const PersonalBook: React.FC = () => {
           )}
           <h2>{book.title}</h2>
           <p>By: {book.author?.join(", ") || "Unknown Author"}</p>
-
-          {/* Updated here */}
           <p>Publication Year: {book.year || "Unknown"}</p>
-          {book.dateAdded ? (
+          {book.dateAdded && (
             <p>Date Added: {new Date(book.dateAdded).toLocaleDateString()}</p>
-          ) : (
-            <></>
           )}
         </section>
 
-        <section className="right-column">
-          <div className="book-description">{book.description}</div>
+        <section className={styles.rightColumn}>
+          <p>{book.description}</p>
 
           <TaskForm bookId={book._id} />
 
-          <div className="tasks-section">
+          <div className={styles.taskSection}>
             <h3>Tasks</h3>
             {tasks.length > 0 ? (
               <ul>
                 {tasks.map((task) => (
                   <li key={task._id}>
-                    <div>
+                    <div className={styles.task}>
                       <p>
                         {task.description} - <strong>{task.status}</strong>
                       </p>
-                      <button onClick={() => fetchCommentsForTask(task._id)}>
-                        View Comments
-                      </button>
                       <button onClick={() => setAddingCommentTaskId(task._id)}>
                         Add Comment
                       </button>
@@ -167,7 +136,7 @@ const PersonalBook: React.FC = () => {
                       <p>Loading comments...</p>
                     ) : (
                       <ul>
-                        {comments[task._id]?.length > 0 ? (
+                        {comments[task._id]?.length ? (
                           comments[task._id].map((comment) => (
                             <li key={comment._id}>
                               <Comment
