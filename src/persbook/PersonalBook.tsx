@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { createTaskForPersonalBook } from "../scripts";
 import { getAuthToken } from "../scripts";
 
 import { Book, Task, Comment as CommentType } from "../types/types";
-import Comment from "../components/comment/comment";
-
+import Comment from "../components/comment/Comment";
 import styles from "./personalBook.module.css";
 import TaskForm from "../components/taskForm/taskForm";
 

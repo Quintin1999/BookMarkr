@@ -1,7 +1,7 @@
 import React, { useState, FormEvent } from "react";
 
 const TaskForm = ({ bookId }: { bookId: string }) => {
-  const [taskName, setTaskName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
 
   async function createTaskForPersonalBook(event: FormEvent): Promise<void> {
     event.preventDefault();
@@ -14,7 +14,7 @@ const TaskForm = ({ bookId }: { bookId: string }) => {
         return;
       }
 
-      if (!bookId || !taskName.trim()) {
+      if (!bookId || !description.trim()) {
         alert("Book ID and description are required.");
         return;
       }
@@ -26,14 +26,14 @@ const TaskForm = ({ bookId }: { bookId: string }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ bookId, taskName }),
+        body: JSON.stringify({ bookId, description }),
       });
 
       const result = await response.json();
 
       if (response.ok) {
         alert("Task created successfully!");
-        setTaskName(""); // Clear the form
+        setDescription(""); // Clear the form
       } else {
         console.error("Error creating task:", result.message);
         alert(`Error: ${result.message}`);
@@ -49,19 +49,19 @@ const TaskForm = ({ bookId }: { bookId: string }) => {
       <h3>Create a Task</h3>
       <input
         id="personalTaskDescription"
-        value={taskName}
+        value={description}
         onChange={(e) => {
           const value = e.target.value;
           if (value.trim() !== "") {
-            setTaskName(value);
+            setDescription(value);
           } else {
-            setTaskName("");
+            setDescription("");
           }
         }}
         placeholder="Enter Task Name"
         required
       />
-      <button type="submit" disabled={!taskName.trim()}>
+      <button type="submit" disabled={!description.trim()}>
         Create Task
       </button>
     </form>
