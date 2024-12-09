@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+<<<<<<< HEAD
 import { jwtDecode } from "jwt-decode";
 import { createTaskForPersonalBook } from "../scripts";
 import { getAuthToken } from "../scripts";
@@ -7,6 +8,13 @@ import { getAuthToken } from "../scripts";
 import { Book, Task, Comment as CommentType } from "../types/types";
 import Comment from "../components/comment/comment";
 
+=======
+
+import { getAuthToken } from "../scripts";
+
+import { Book, Task, Comment as CommentType } from "../types/types";
+import Comment from "../components/comment/Comment";
+>>>>>>> 5c327e4e5c379317d57c07739c76295db121395a
 import styles from "./personalBook.module.css";
 import TaskForm from "../components/taskForm/taskForm";
 
