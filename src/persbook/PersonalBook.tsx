@@ -8,6 +8,7 @@ import styles from "./personalBook.module.css";
 import TaskForm from "../components/taskForm/TaskForm";
 import { jwtDecode } from "jwt-decode";
 
+
 const PersonalBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<Book | null>(null);
@@ -16,6 +17,7 @@ const PersonalBook: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
   const [addingCommentTaskId, setAddingCommentTaskId] = useState<string | null>(null);
+
   const [newCommentContent, setNewCommentContent] = useState<string>("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -34,48 +36,29 @@ const PersonalBook: React.FC = () => {
   };
 
   useEffect(() => {
+    const fetchCurrentUser=async()=>{
+    const token= await getAuthToken();
+    if(token){
+      const decodedToken:{userId:string}=jwtDecode(token);
+      setCurrentUserId(decodedToken.userId)
+    }
+  }
     const fetchBookAndTasks = async () => {
       try {
-        const token = await getAuthToken();
-        if (token) {
-          try {
-            const decodedToken: { id: string } = jwtDecode(token);
-            setCurrentUserId(decodedToken.id); // Correctly set user ID
-            console.log("Decoded user ID:", decodedToken.id);
-          } catch (error) {
-            console.error("Error decoding token:", error);
-          }
-        } else {
-          console.error("No token found");
-        }
-
-        // Fetch book details
-        const bookResponse = await fetch(`http://localhost:3000/api/books/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!bookResponse.ok) throw new Error("Failed to fetch book details");
-
-        const bookData = await bookResponse.json();
+        const [bookData, tasksData] = await Promise.all([
+          fetchWithAuth(`http://localhost:3000/api/books/${id}`),
+          fetchWithAuth(`http://localhost:3000/api/tasks/book/${id}`),
+        ]);
         setBook(bookData);
-
-        // Fetch tasks for the specific book
-        const tasksResponse = await fetch(
-          `http://localhost:3000/api/tasks/book/${id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        if (!tasksResponse.ok) throw new Error("Failed to fetch tasks for this book");
-
-        const tasksData: Task[] = await tasksResponse.json();
-        setTasks(tasksData); // Set all tasks initially
+        setTasks(tasksData);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching book and tasks:", error);
       } finally {
         setLoading(false);
       }
     };
-
+    
+    fetchCurrentUser();
     fetchBookAndTasks();
   }, [id]);
 
@@ -102,6 +85,10 @@ const PersonalBook: React.FC = () => {
       setLoadingComments((prev) => ({ ...prev, [taskId]: false }));
     }
   };
+
+  useEffect(() => {
+    tasks.forEach((task) => fetchCommentsForTask(task._id));
+  }, [tasks]);
 
   const addComment = async (taskId: string) => {
     try {
@@ -155,13 +142,32 @@ const PersonalBook: React.FC = () => {
                 {filteredTasks.map((task) => (
                   <li key={task._id}>
                     <div className={styles.task}>
-                      <p>
-                        {task.description} - <strong>{task.status}</strong>
+
+
+                      <p className={styles.taskDescription}>
+                        {task.description}
                       </p>
+                      <p className={styles.taskStatus}>{task.status}</p>
                       <button onClick={() => setAddingCommentTaskId(task._id)}>
                         Add Comment
                       </button>
                     </div>
+
+                    {addingCommentTaskId === task._id && (
+                      <div className={styles.addComment}>
+                        <input
+                          value={newCommentContent}
+                          onChange={(e) => setNewCommentContent(e.target.value)}
+                          placeholder="Enter your comment"
+                        />
+                        <button onClick={() => addComment(task._id)}>
+                          Submit
+                        </button>
+                        <button onClick={() => setAddingCommentTaskId(null)}>
+                          X
+                        </button>
+                      </div>
+                    )}
 
                     {loadingComments[task._id] ? (
                       <p>Loading comments...</p>
@@ -177,25 +183,9 @@ const PersonalBook: React.FC = () => {
                             </li>
                           ))
                         ) : (
-                          <p>No comments yet.</p>
+                          <p>Add your first comment.</p>
                         )}
                       </ul>
-                    )}
-
-                    {addingCommentTaskId === task._id && (
-                      <div className="add-comment-section">
-                        <textarea
-                          value={newCommentContent}
-                          onChange={(e) => setNewCommentContent(e.target.value)}
-                          placeholder="Enter your comment"
-                        />
-                        <button onClick={() => addComment(task._id)}>
-                          Submit
-                        </button>
-                        <button onClick={() => setAddingCommentTaskId(null)}>
-                          Cancel
-                        </button>
-                      </div>
                     )}
                   </li>
                 ))}
