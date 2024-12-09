@@ -284,7 +284,8 @@ export async function createTaskForPersonalBook(
     )?.value;
 
     if (!bookId || !description.trim()) {
-      alert("Book ID and description are required.");
+      //alert("Book ID and description are required.");
+      alert(bookId)
       return;
     }
 
